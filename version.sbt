@@ -1,1 +1,1 @@
-version in ThisBuild := "0.7.0-1-SNAPSHOT"
+version in ThisBuild := Versions.dropwizard + "-1-SNAPSHOT"
