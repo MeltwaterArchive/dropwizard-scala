@@ -47,6 +47,7 @@ resolvers ++= Seq(
 // dependencies
 libraryDependencies ++= Seq(
     "io.dropwizard" % "dropwizard-core" % dropwizardVersion.value,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.1"
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.1",
+    "org.specs2" %% "specs2" % "2.3.8" % "test"
 )
 
