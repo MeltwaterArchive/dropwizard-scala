@@ -1,0 +1,11 @@
+.idea/
+/lib/
+target/
+atlassian-ide-plugin.xml
+dependency-reduced-pom.xml
+*.iml
+*.ipr
+.settings/
+.classpath
+.project
+
