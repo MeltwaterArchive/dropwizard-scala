@@ -16,13 +16,18 @@ package object scala {
   implicit class JDBIWrapper(db: DBI) {
 
     /** Creates a typed DAO instance.
+     *
+     * @tparam T type of the DAO to create.
+     * @return a DAO instance for the specified type.
+     */
+    def open[T : ClassTag]: T = db.open[T](classTag[T].runtimeClass.asInstanceOf[Class[T]])
+
+    /** Creates an on-demand typed DAO instance.
       *
       * @tparam T type of the DAO to create.
-      * @return a DAO instance for the specified type.
+      * @return an on-demand DAO instance for the specified type.
       */
-    def daoFor[T : ClassTag]: T = {
-      db.onDemand[T](classTag[T].runtimeClass.asInstanceOf[Class[T]])
-    }
+    def daoFor[T : ClassTag]: T = db.onDemand[T](classTag[T].runtimeClass.asInstanceOf[Class[T]])
 
     /** Executes the given function within a transaction.
       *
