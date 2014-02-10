@@ -26,7 +26,7 @@ scalaVersion in ThisBuild := "2.10.3"
 crossScalaVersions in ThisBuild := Seq("2.10.3")
 
 // compile more strictly
-scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked")
+scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
 
 // ensure JDK 1.7+
 javacOptions in ThisBuild ++= Seq("-source", "1.7", "-target", "1.7")
