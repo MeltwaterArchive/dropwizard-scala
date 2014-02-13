@@ -1,12 +1,11 @@
-package io.dropwizard.jdbi.scala
+package io.dropwizard.scala.jdbi.tweak
 
 import scala.collection.immutable.{SortedSet, HashSet}
 
 import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
 
 /**
- * Tests [[io.dropwizard.jdbi.scala.IterableContainerFactory]]
+ * Tests [[io.dropwizard.scala.jdbi.tweak.IterableContainerFactory]]
  */
 class IterableContainerFactorySpec extends Specification {
 

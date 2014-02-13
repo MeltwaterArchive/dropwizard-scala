@@ -1,4 +1,4 @@
-package io.dropwizard.jdbi.scala
+package io.dropwizard.scala.jdbi.tweak
 
 import scala.language.higherKinds
 

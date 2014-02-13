@@ -1,4 +1,4 @@
-package io.dropwizard.jdbi.scala
+package io.dropwizard.scala.jdbi.tweak
 
 import org.skife.jdbi.v2.ContainerBuilder
 import org.skife.jdbi.v2.tweak.ContainerFactory

@@ -1,4 +1,4 @@
-package io.dropwizard.jdbi
+package io.dropwizard.scala
 
 import reflect.{ClassTag, classTag}
 
@@ -7,7 +7,7 @@ import org.skife.jdbi.v2.sqlobject.mixins.Transactional
 import org.skife.jdbi.v2.tweak.HandleCallback
 
 /** Global definitions and implicits for JDBI. */
-package object scala {
+package object jdbi {
 
   /** Provides idiomatic Scala enhancements to the JDBI API.
     *

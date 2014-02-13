@@ -1,12 +1,9 @@
-package io.dropwizard.jdbi.scala
-
-import scala.collection.immutable.{SortedSet, HashSet}
+package io.dropwizard.scala.jdbi.tweak
 
 import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
 
 /**
- * Tests [[io.dropwizard.jdbi.scala.OptionContainerFactory]]
+ * Tests [[io.dropwizard.scala.jdbi.tweak.OptionContainerFactory]]
  */
 class OptionContainerFactorySpec extends Specification {
 
