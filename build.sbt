@@ -45,11 +45,13 @@ libraryDependencies in ThisBuild ++= Seq(
 )
 
 // aggregate sub-modules
-lazy val parent = project.in(file(".")).aggregate(core, jersey, jdbi)
+lazy val parent = project.in(file(".")).aggregate(core, jersey, jdbi, validation)
 
-lazy val core = project.dependsOn(jersey)
+lazy val core = project.dependsOn(jersey).dependsOn(validation)
 
 lazy val jersey = project
+
+lazy val validation = project
 
 lazy val jdbi = project
 
