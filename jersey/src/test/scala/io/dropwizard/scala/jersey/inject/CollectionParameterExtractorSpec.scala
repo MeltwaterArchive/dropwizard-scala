@@ -3,7 +3,6 @@ package io.dropwizard.scala.jersey.inject
 import com.sun.jersey.core.util.MultivaluedMapImpl
 
 import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
 import org.specs2.mock.Mockito
 
 /** Tests for [[io.dropwizard.scala.jersey.inject.CollectionParameterExtractor]]. */
