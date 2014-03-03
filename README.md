@@ -37,3 +37,42 @@ JDBI
     handle: Handle => handle.attach[MyDAO].myQuery(123)
   }
   ```
+
+Validation
+----------
+
+  * Support for all JSR-303 and Hibernate Validator constraints on Scala types.
+    In particular, support is added for `@NotEmpty` and `@Size` on Scala 
+    collections. All other constraint annotations work on Scala types out of 
+    the box.
+
+  * Validation of Scala `case class` properties using JSR-303 and Hibernate 
+    Validator constraints. To validate a `case class`, you will need to use the
+    wrapper constraints defined in `io.dropwizard.scala.validation.constraints`:
+    
+  ```scala
+  import io.dropwizard.scala.validation.constraints._
+  
+  case class MyConfiguration(
+    @NotEmpty names: List[String], 
+    @Min(0) age: Int
+  ) extends Configuration
+  ```
+
+### Limitations
+
+In order to cascade validation using `@Valid` on collection types, Hibernate 
+requires that the collection provide a Java `Iterator`. Since Scala collections
+don't provide this, they cannot cascade validation.
+
+In the following example, only `MyConfiguration` is validated. `Person` values
+held in the `people` collection are not validated, though the size of `people` 
+is.
+
+```scala
+case class MyConfiguration(@Valid @NotEmpty people: List[Person]) 
+  extends Configuration
+
+case class Person(@NotEmpty name: String, @Min(0) age: Int)
+```
+

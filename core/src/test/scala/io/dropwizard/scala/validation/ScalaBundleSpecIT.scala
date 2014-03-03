@@ -16,8 +16,8 @@ import com.google.common.collect.ImmutableMap
 import javax.ws.rs.{Path, GET}
 
 case class ScalaTestConfiguration(
-  @JsonProperty("greeting") @NotEmpty greeting: Option[String] = None,
-  @JsonProperty("names") @NotEmpty @Size(max = 5) names: List[String] = Nil
+  @NotEmpty greeting: Option[String] = None,
+  @NotEmpty @Size(max = 5) names: List[String] = Nil
 ) extends Configuration
 
 @Path("/") class ScalaTestResource(greeting: String, names: List[String]) {
