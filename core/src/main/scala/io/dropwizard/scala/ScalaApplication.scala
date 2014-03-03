@@ -16,7 +16,7 @@ trait ScalaApplication[A <: Configuration] extends Application[A] {
 
   /** Service initialization.
     *
-    * Ensures that [[ScalaBundle]] is always included in Scala
+    * Ensures that [[io.dropwizard.scala.ScalaBundle]] is always included in Scala
     * services.
     *
     * To customize initialization behaviour, override `ScalaService#init(Bootstrap)`.
