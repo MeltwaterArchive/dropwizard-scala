@@ -6,6 +6,32 @@ Dropwizard Scala
 Core
 ----
 
+  * A base `ScalaApplication` trait for applications to be defined as
+    a singleton object:
+
+  ```scala
+  import io.dropwizard.Configuration
+  import io.dropwizard.scala.ScalaApplication
+  
+  case class MyConfiguration(
+    @NotEmpty greeting: String, 
+    @NotNull greeters: List[String]
+  ) extends Configuration
+
+  object MyApplication extends ScalaApplication[MyConfiguration] {
+    def init(bootstrap: Bootstrap[MyConfiguration]) {
+      
+    }
+
+    def run(conf: MyConfiguration, env: Environment) {
+
+    }
+  }
+  ```
+  
+  When you build an application like this, the `ScalaBundle` is automatically
+  added, providing everything else described here.
+
   * Jackson support for Scala collections, `Option` and case classes, 
     enabling (de)serialization of Scala collections/case classes in 
     configurations and within Jersey request/response entities.
