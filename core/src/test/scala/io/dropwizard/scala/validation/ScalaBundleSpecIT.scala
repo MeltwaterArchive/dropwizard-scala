@@ -8,7 +8,6 @@ import io.dropwizard.{Configuration, Application}
 import io.dropwizard.setup.{Environment, Bootstrap}
 import io.dropwizard.lifecycle.ServerLifecycleListener
 import com.google.common.io.Resources
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.eclipse.jetty.server.Server
 import io.dropwizard.cli.ServerCommand
 import net.sourceforge.argparse4j.inf.Namespace
