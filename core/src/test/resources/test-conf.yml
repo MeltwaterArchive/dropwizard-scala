@@ -1,0 +1,5 @@
+greeting: "Hello, %s"
+names:
+  - Nick
+  - Chris
+  - Fiona
