@@ -11,7 +11,7 @@ startYear in ThisBuild := Some(2014)
 
 licenses in ThisBuild += ("Apache License 2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-organization in ThisBuild := "io.dropwizard"
+organization in ThisBuild := "io.dropwizard.scala"
 
 scmInfo in ThisBuild := Some(ScmInfo(
     browseUrl = url("http://github.com/dropwizard/dropwizard-scala/"), 
