@@ -3,6 +3,45 @@ Dropwizard Scala
 
 *Scala support for [Dropwizard](http://dropwizard.io).*
 
+Usage
+-----
+
+Include the `dropwizard-scala-core` artifact in your POM:
+
+```xml
+<dependency>
+    <groupId>io.dropwizard.scala</groupId>
+    <artifactId>dropwizard-scala-core_2.10.2</artifactId>
+    <version>0.7.0-1</version>
+</dependency>
+```
+
+It's good practice to keep your Scala version as a global property that you
+can use elsewhere to ensure coherence in your POM:
+
+```xml
+<properties>
+    <scala.version>2.10.2</scala.version>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>io.dropwizard.scala</groupId>
+        <artifactId>dropwizard-scala-core_${scala.version}</artifactId>
+        <version>0.7.0-1</version>
+    </dependency>
+</dependencies>
+``` 
+
+If you're using SBT, it's a little simpler:
+
+```scala
+libraryDependencies += "io.dropwizard.scala" %% "dropwizard-scala-core" % "0.7.0-1"
+```
+
+For JDBI support, you will also want to include the `dropwizard-scala-jdbi` 
+module, explicitly.
+
 Core
 ----
 
