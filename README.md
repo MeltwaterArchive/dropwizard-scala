@@ -6,6 +6,16 @@ Dropwizard Scala
 Usage
 -----
 
+Just add a dependency to `dropwizard-scala-core` and `dropwizard-scala-jdbi` _(optional)_ to your project:
+
+### SBT
+
+```scala
+libraryDependencies += "io.dropwizard.scala" %% "dropwizard-scala-core" % "0.7.0-1"
+```
+
+### Maven
+
 Include the `dropwizard-scala-core` artifact in your POM:
 
 ```xml
@@ -32,15 +42,6 @@ can use elsewhere to ensure coherence in your POM:
     </dependency>
 </dependencies>
 ``` 
-
-If you're using SBT, it's a little simpler:
-
-```scala
-libraryDependencies += "io.dropwizard.scala" %% "dropwizard-scala-core" % "0.7.0-1"
-```
-
-For JDBI support, you will also want to include the `dropwizard-scala-jdbi` 
-module, explicitly.
 
 Core
 ----
