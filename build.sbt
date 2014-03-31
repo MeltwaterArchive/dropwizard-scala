@@ -41,7 +41,8 @@ resolvers in ThisBuild ++= Seq(
 
 // dependencies
 libraryDependencies in ThisBuild ++= Seq(
-    "org.specs2" %% "specs2" % "2.3.8" % "test"
+    "org.scalatest" %% "scalatest" % "2.1.0" % "test",
+    "org.mockito" % "mockito-core" % "1.9.5" % "test"
 )
 
 // aggregate sub-modules

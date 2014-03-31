@@ -1,45 +1,39 @@
 package io.dropwizard.scala.jersey.inject
 
+import org.scalatest.FlatSpec
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.Matchers.{ eq => is }
+
 import com.sun.jersey.server.impl.model.parameter.multivalued.MultivaluedParameterExtractor
 import com.sun.jersey.api.core.{ExtendedUriInfo, HttpContext}
 import javax.ws.rs.core.MultivaluedMap
 
-import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
-import org.specs2.mock.Mockito
-
 /**
  * Tests [[io.dropwizard.scala.jersey.inject.CollectionQueryParamInjectable]]
  */
-class CollectionQueryParamInjectableSpec extends Specification with Mockito {
+class CollectionQueryParamInjectableSpec extends FlatSpec with MockitoSugar {
 
   val extractor = mock[MultivaluedParameterExtractor]
   val context = mock[HttpContext]
   val uriInfo = mock[ExtendedUriInfo]
   val params = mock[MultivaluedMap[String, String]]
-  val extracted = mock[Object]
+  val extracted = new Object
 
-  extractor.extract(params) returns extracted
-  context.getUriInfo returns uriInfo
+  when(context.getUriInfo) thenReturn uriInfo
+  when(extractor.extract(is(params))) thenReturn (extracted, Nil: _*)
 
-  "A decoding ScalaCollectionQueryParamInjectable" should {
-
+  "A decoding ScalaCollectionQueryParamInjectable" should "extract query parameters" in {
     val injectable = new CollectionQueryParamInjectable(extractor, true)
-    uriInfo.getQueryParameters(true) returns params
-
-    "extract query parameters" in {
-      injectable.getValue(context) must be(extracted)
-    }
+    when(uriInfo.getQueryParameters(is(true))) thenReturn params
+    assert(injectable.getValue(context) === extracted)
+    verify(uriInfo).getQueryParameters(true)
   }
 
-  "A non-decoding ScalaCollectionQueryParamInjectable" should {
-
+  "A non-decoding ScalaCollectionQueryParamInjectable" should "extract query parameters" in {
     val injectable = new CollectionQueryParamInjectable(extractor, false)
-    uriInfo.getQueryParameters(false) returns params
-
-    "extract query parameters" in {
-      injectable.getValue(context) must be(extracted)
-    }
+    when(uriInfo.getQueryParameters(is(false))) thenReturn params
+    assert(injectable.getValue(context) === extracted)
+    verify(uriInfo).getQueryParameters(false)
   }
-
 }

@@ -1,63 +1,58 @@
 package io.dropwizard.scala.jdbi.tweak
 
-import org.specs2.mutable._
+import org.scalatest.FlatSpec
 
 /**
  * Tests [[io.dropwizard.scala.jdbi.tweak.OptionContainerFactory]]
  */
-class OptionContainerFactorySpec extends Specification {
+class OptionContainerFactorySpec extends FlatSpec {
 
-  "OptionContainerFactory for Ints" should {
-    val factory = new OptionContainerFactory
+  val factory = new OptionContainerFactory
 
-    "Accepts Options" in {
-      factory.accepts(classOf[Option[Int]]) must beTrue
-    }
-
-    "Doesn't accept Lists" in {
-      factory.accepts(classOf[List[Int]]) must beFalse
-    }
-
-    "Builds a None by default" in {
-      factory.newContainerBuilderFor(classOf[Int])
-        .build() must beNone
-    }
-
-    "Builds a Some of an Int on demand" in {
-      factory.newContainerBuilderFor(classOf[Int]).add(123)
-        .build() must beSome(123)
-    }
-
-    "Builds a Some of the last Int on demand" in {
-      factory.newContainerBuilderFor(classOf[Int]).add(123).add(456)
-        .build() must beSome(456)
-    }
+  "OptionContainerFactory for Ints" should "Accepts Options" in {
+    assert(factory.accepts(classOf[Option[Int]]))
   }
 
-  "OptionContainerFactory for Strings" should {
-    val factory = new OptionContainerFactory
+  it should "not accept Lists" in {
+    assert(!factory.accepts(classOf[List[Int]]))
+  }
 
-    "Accepts Options" in {
-      factory.accepts(classOf[Option[String]]) must beTrue
-    }
+  it should "build a None by default" in {
+  assert(factory.newContainerBuilderFor(classOf[Int])
+      .build() === None)
+  }
 
-    "Doesn't accept Lists" in {
-      factory.accepts(classOf[List[String]]) must beFalse
-    }
+  it should "Builds a Some of an Int on demand" in {
+    assert(factory.newContainerBuilderFor(classOf[Int]).add(123)
+      .build() === Some(123))
+  }
 
-    "Builds a None by default" in {
-      factory.newContainerBuilderFor(classOf[String])
-        .build() must beNone
-    }
+  it should "Builds a Some of the last Int on demand" in {
+    assert(factory.newContainerBuilderFor(classOf[Int]).add(123).add(456)
+      .build() === Some(456))
+  }
 
-    "Builds a Some of a String on demand" in {
-      factory.newContainerBuilderFor(classOf[String]).add("abc")
-        .build() must beSome("abc")
-    }
 
-    "Builds a Some of the last String on demand" in {
-      factory.newContainerBuilderFor(classOf[String]).add("abc").add("def")
-        .build() must beSome("def")
-    }
+  "OptionContainerFactory for Strings" should "accept Options" in {
+    assert(factory.accepts(classOf[Option[String]]))
+  }
+
+  it should "Doesn't accept Lists" in {
+    assert(!factory.accepts(classOf[List[String]]))
+  }
+
+  it should "Builds a None by default" in {
+    assert(factory.newContainerBuilderFor(classOf[String])
+      .build() === None)
+  }
+
+  it should "Builds a Some of a String on demand" in {
+    assert(factory.newContainerBuilderFor(classOf[String]).add("abc")
+      .build() === Some("abc"))
+  }
+
+  it should "Builds a Some of the last String on demand" in {
+    assert(factory.newContainerBuilderFor(classOf[String]).add("abc").add("def")
+      .build() === Some("def"))
   }
 }

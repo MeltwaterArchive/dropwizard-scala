@@ -1,48 +1,41 @@
 package io.dropwizard.scala.jersey.inject
 
+import org.scalatest.FlatSpec
+
 import com.sun.jersey.core.util.MultivaluedMapImpl
 
-import org.specs2.mutable._
-import org.specs2.runner.JUnitRunner
-import org.specs2.mock.Mockito
-
 /** Tests for [[io.dropwizard.scala.jersey.inject.OptionParameterExtractor]]. */
-class OptionParameterExtractorSpec extends Specification with Mockito {
+class OptionParameterExtractorSpec extends FlatSpec {
 
-  "Extracting a parameter" should {
-
+  "Extracting a parameter" should "have a name" in {
     val extractor = new OptionParameterExtractor("name", "default")
-
-    "have a name" in {
-      extractor.getName must be("name")
-    }
-
-    "have a default value" in {
-      extractor.getDefaultStringValue must be("default")
-    }
-
-    "extract the first value from a set of parameter values" in {
-      val params = new MultivaluedMapImpl()
-      params.add("name", "one")
-      params.add("name", "two")
-      params.add("name", "three")
-
-      extractor.extract(params) must beSome("one")
-    }
-
-    "uses the default value if no parameter exists" in {
-      val params = new MultivaluedMapImpl()
-
-      extractor.extract(params) must beSome("default")
-    }
+    assert(extractor.getName === "name")
   }
 
-  "Extracting a parameter without a default value" should {
+  it should "have a default value" in {
+    val extractor = new OptionParameterExtractor("name", "default")
+    assert(extractor.getDefaultStringValue === "default")
+  }
 
+  it should "extract the first value from a set of parameter values" in {
+    val extractor = new OptionParameterExtractor("name", "default")
+    val params = new MultivaluedMapImpl()
+    params.add("name", "one")
+    params.add("name", "two")
+    params.add("name", "three")
+
+    assert(extractor.extract(params) === Some("one"))
+  }
+
+  it should "uses the default value if no parameter exists" in {
+    val extractor = new OptionParameterExtractor("name", "default")
+    val params = new MultivaluedMapImpl()
+
+    assert(extractor.extract(params) === Some("default"))
+  }
+
+  "Extracting a parameter without a default value" should  "return None if no parameter exists" in {
     val extractor = new OptionParameterExtractor("name", null)
-
-    "return None if no parameter exists" in {
-      extractor.extract(new MultivaluedMapImpl()) must beNone
-    }
+    assert(extractor.extract(new MultivaluedMapImpl()) === None)
   }
 }

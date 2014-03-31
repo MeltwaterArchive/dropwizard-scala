@@ -1,73 +1,66 @@
 package io.dropwizard.scala.jdbi.tweak
 
-import scala.collection.immutable.{SortedSet, HashSet}
+import org.scalatest.FlatSpec
 
-import org.specs2.mutable._
+import scala.collection.immutable.{SortedSet, HashSet}
 
 /**
  * Tests [[io.dropwizard.scala.jdbi.tweak.IterableContainerFactory]]
  */
-class IterableContainerFactorySpec extends Specification {
+class IterableContainerFactorySpec extends FlatSpec {
 
-  "IterableContainerFactory for Seqs" should {
-    val factory = new IterableContainerFactory[Seq]
-
-    "Accepts Seqs" in {
-      factory.accepts(classOf[Seq[Int]]) must beTrue
-    }
-
-    "Accepts Lists" in {
-      factory.accepts(classOf[List[Int]]) must beTrue
-    }
-
-    "Accepts Vectors" in {
-      factory.accepts(classOf[Vector[Int]]) must beTrue
-    }
-
-    "Builds an empty Seq" in {
-      factory.newContainerBuilderFor(classOf[Int])
-        .build() must beEmpty[Seq[_]]
-    }
-
-    "Builds a Seq of Ints on demand" in {
-      factory.newContainerBuilderFor(classOf[Int]).add(123)
-        .build() must beEqualTo(Seq(123))
-    }
-
-    "Builds a Seq of Strings on demand" in {
-      factory.newContainerBuilderFor(classOf[String]).add("abc").add("def")
-        .build() must beEqualTo(Seq("abc", "def"))
-    }
+  "IterableContainerFactory for Seqs" should "accept Seqs" in {
+    assert(new IterableContainerFactory[Seq].accepts(classOf[Seq[Int]]))
   }
 
-  "IterableContainerFactory for Sets" should {
-    val factory = new IterableContainerFactory[Set]
+  it should "accept Lists" in {
+    assert(new IterableContainerFactory[Seq].accepts(classOf[List[Int]]))
+  }
 
-    "Accepts Sets" in {
-      factory.accepts(classOf[Set[Int]]) must beTrue
-    }
+  it should "accept Vectors" in {
+    assert(new IterableContainerFactory[Seq].accepts(classOf[Vector[Int]]))
+  }
 
-    "Accepts Lists" in {
-      factory.accepts(classOf[SortedSet[Int]]) must beTrue
-    }
+  it should "build an empty Seq" in {
+    assert(new IterableContainerFactory[Seq].newContainerBuilderFor(classOf[Int])
+      .build().isEmpty)
+  }
 
-    "Accepts Vectors" in {
-      factory.accepts(classOf[HashSet[Int]]) must beTrue
-    }
+  it should "build a Seq of Ints on demand" in {
+    assert(new IterableContainerFactory[Seq].newContainerBuilderFor(classOf[Int]).add(123)
+      .build() === Seq(123))
+  }
 
-    "Builds an empty Set" in {
-      factory.newContainerBuilderFor(classOf[Int])
-        .build() must beEmpty[Set[_]]
-    }
+  it should "build a Seq of Strings on demand" in {
+    assert(new IterableContainerFactory[Seq].newContainerBuilderFor(classOf[String]).add("abc").add("def")
+      .build() === Seq("abc", "def"))
+  }
 
-    "Builds a Set of Ints on demand" in {
-      factory.newContainerBuilderFor(classOf[Int]).add(123)
-        .build() must beEqualTo(Set(123))
-    }
 
-    "Builds a Set of Strings on demand" in {
-      factory.newContainerBuilderFor(classOf[String]).add("abc").add("def")
-        .build() must beEqualTo(Set("abc", "def"))
-    }
+  "IterableContainerFactory for Sets" should "accept Sets" in {
+    assert(new IterableContainerFactory[Set].accepts(classOf[Set[Int]]))
+  }
+
+  it should "accept Lists" in {
+    assert(new IterableContainerFactory[Set].accepts(classOf[SortedSet[Int]]))
+  }
+
+  it should "accept Vectors" in {
+    assert(new IterableContainerFactory[Set].accepts(classOf[HashSet[Int]]))
+  }
+
+  it should "build an empty Set" in {
+    assert(new IterableContainerFactory[Set].newContainerBuilderFor(classOf[Int])
+      .build().isEmpty)
+  }
+
+  it should "build a Set of Ints on demand" in {
+    assert(new IterableContainerFactory[Set].newContainerBuilderFor(classOf[Int]).add(123)
+      .build() === Set(123))
+  }
+
+  it should "build a Set of Strings on demand" in {
+    assert(new IterableContainerFactory[Set].newContainerBuilderFor(classOf[String]).add("abc").add("def")
+      .build() === Set("abc", "def"))
   }
 }

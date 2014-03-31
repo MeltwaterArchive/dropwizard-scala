@@ -24,17 +24,17 @@ class CollectionsQueryParamInjectableProvider
     val clazz = param.getParameterClass
 
     if (name != null && !name.isEmpty) {
-      val ex = if (clazz == classOf[Seq[String]]) {
-          new CollectionParameterExtractor[Seq[String]](name, default)
-        } else if (clazz == classOf[List[String]]) {
-          new CollectionParameterExtractor[List[String]](name, default)
-        } else if (clazz == classOf[Vector[String]]) {
-          new CollectionParameterExtractor[Vector[String]](name, default)
-        } else if (clazz == classOf[IndexedSeq[String]]) {
-          new CollectionParameterExtractor[IndexedSeq[String]](name, default)
-        } else if (clazz == classOf[Set[String]]) {
-          new CollectionParameterExtractor[Set[String]](name, default)
-        } else if (clazz == classOf[Option[String]]) {
+      val ex = if (clazz == classOf[Seq[_]]) {
+          new StringCollectionParameterExtractor[Seq](name, default)
+        } else if (clazz == classOf[List[_]]) {
+          new StringCollectionParameterExtractor[List](name, default)
+        } else if (clazz == classOf[Vector[_]]) {
+          new StringCollectionParameterExtractor[Vector](name, default)
+        } else if (clazz == classOf[IndexedSeq[_]]) {
+          new StringCollectionParameterExtractor[IndexedSeq](name, default)
+        } else if (clazz == classOf[Set[_]]) {
+          new StringCollectionParameterExtractor[Set](name, default)
+        } else if (clazz == classOf[Option[_]]) {
           new OptionParameterExtractor(name, default)
         } else {
           null

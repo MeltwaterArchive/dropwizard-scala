@@ -1,41 +1,34 @@
 package io.dropwizard.scala.jersey.inject
 
+import org.scalatest.FlatSpec
+
 import com.sun.jersey.core.util.MultivaluedMapImpl
 
-import org.specs2.mutable._
-import org.specs2.mock.Mockito
-
 /** Tests for [[io.dropwizard.scala.jersey.inject.CollectionParameterExtractor]]. */
-class CollectionParameterExtractorSpec extends Specification with Mockito {
+class CollectionParameterExtractorSpec extends FlatSpec {
 
-  "Extractor with default" should {
-
-    val extractor = new CollectionParameterExtractor[Set[String]]("name", "default")
-
-    "have a name" in {
-      extractor.getName must be("name")
-    }
-
-    "extract parameter values" in {
-      val params = new MultivaluedMapImpl()
-      params.add("name", "one")
-      params.add("name", "two")
-      params.add("name", "three")
-
-      extractor.extract(params) must_== (Set("one", "two", "three"))
-    }
-
-    "uses default if no parameter exists" in {
-      extractor.extract(new MultivaluedMapImpl()) must_== (Set("default"))
-    }
+  "StringCollectionParameterExtractor with default" should "have a name" in {
+    val extractor = new StringCollectionParameterExtractor[Set]("name", "default")
+    assert(extractor.getName === "name")
   }
 
-  "Extractor without default" should {
+  it should "extract parameter values" in {
+    val extractor = new StringCollectionParameterExtractor[Set]("name", "default")
+    val params = new MultivaluedMapImpl()
+    params.add("name", "one")
+    params.add("name", "two")
+    params.add("name", "three")
 
-    val extractor = new CollectionParameterExtractor[Set[String]]("name", null)
+    assert(extractor.extract(params) === Set("one", "two", "three"))
+  }
 
-    "return empty collection" in {
-      extractor.extract(new MultivaluedMapImpl()) must_== (Set.empty)
-    }
+  it should "uses default if no parameter exists" in {
+    val extractor = new StringCollectionParameterExtractor[Set]("name", "default")
+    assert(extractor.extract(new MultivaluedMapImpl()) === Set("default"))
+  }
+
+  "Extractor without default" should "return empty collection" in {
+    val extractor = new StringCollectionParameterExtractor[Set]("name", null)
+    assert(extractor.extract(new MultivaluedMapImpl()) === Set.empty)
   }
 }
