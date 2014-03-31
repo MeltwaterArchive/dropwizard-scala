@@ -45,6 +45,33 @@ libraryDependencies in ThisBuild ++= Seq(
     "org.mockito" % "mockito-core" % "1.9.5" % "test"
 )
 
+// publish to Sonatype OSS
+publishMavenStyle := true
+
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+pomExtra := (
+    <scm>
+        <url>git@github.com:dropwizard/dropwizard-scala.git</url>
+        <connection>scm:git:git@github.com:dropwizard/dropwizard-scala.git</connection>
+    </scm>
+    <developers>
+        <developer>
+          <id>nicktelford</id>
+          <name>Nick Telford</name>
+        </developer>
+    </developers>)
+
 // aggregate sub-modules
 lazy val parent = project.in(file(".")).aggregate(core, jersey, jdbi, validation)
 
