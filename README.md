@@ -32,13 +32,15 @@ can use elsewhere to ensure coherence in your POM:
 ```xml
 <properties>
     <scala.version>2.10.2</scala.version>
+    <dropwizard.version>0.7.0-1</dropwizard.version>
+    <dropwizard.scala.version>${dropwizard.version}-1</dropwizard.scala.version>
 </properties>
 
 <dependencies>
     <dependency>
         <groupId>io.dropwizard.scala</groupId>
         <artifactId>dropwizard-scala-core_${scala.version}</artifactId>
-        <version>0.7.0-1</version>
+        <version>${dropwizard.scala.version}</version>
     </dependency>
 </dependencies>
 ``` 
@@ -103,6 +105,24 @@ JDBI
     handle: Handle => handle.attach[MyDAO].myQuery(123)
   }
   ```
+
+To enable Scala integration for JDBI, you will need to add an extra dependency:
+
+### SBT
+
+```scala
+libraryDependencies += "io.dropwizard.scala" %% "dropwizard-scala-jdbi" % "0.7.0-1"
+```
+
+### Maven
+
+```xml
+<dependency>
+    <groupId>io.dropwizard.scala</groupId>
+    <artifactId>dropwizard-scala-jdbi_${scala.version}</artifactId>
+    <version>${dropwizard.scala.version}</version>
+</dependency>
+```
 
 Validation
 ----------
