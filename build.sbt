@@ -21,9 +21,9 @@ scmInfo in ThisBuild := Some(ScmInfo(
 
 
 // compile with Scala 2.10+
-scalaVersion in ThisBuild := "2.10.3"
+scalaVersion in ThisBuild := "2.10.4"
 
-crossScalaVersions in ThisBuild := Seq("2.10.3")
+crossScalaVersions in ThisBuild := Seq("2.10.4")
 
 // compile more strictly
 scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
