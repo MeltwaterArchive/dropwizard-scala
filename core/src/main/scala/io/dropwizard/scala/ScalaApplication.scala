@@ -26,6 +26,9 @@ import io.dropwizard.{Application, Configuration}
   **/
 trait ScalaApplication[A <: Configuration] extends Application[A] {
 
+  // when the application is a singleton object, we need to strip the trailing dollar from its name
+  override def getName: String = getClass.getSimpleName.stripSuffix("$")
+
   /** Entry point for this Dropwizard [[io.dropwizard.Application]].
     *
     * @param args the command-line arguments the program was invoked with.
