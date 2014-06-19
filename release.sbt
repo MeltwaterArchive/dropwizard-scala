@@ -19,19 +19,6 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra := {
-  <url>http://scala.dropwizard.io/</url>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <connection>scm:git:git@github.com:dropwizard/dropwizard-scala.git</connection>
-    <developerConnection>scm:git:git@github.com:dropwizard/dropwizard-scala.git</developerConnection>
-    <url>http://github.com/dropwizard/dropwizard-scala</url>
-  </scm>
   <developers>
     <developer>
       <id>nicktelford</id>
