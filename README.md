@@ -78,6 +78,9 @@ Core
     enabling (de)serialization of Scala collections/case classes in 
     configurations and within Jersey request/response entities.
 
+  * A `Logging` trait and macro-derived conditional logging, courtesey of 
+    [Scala Logging](https://github.com/typesafehub/scala-logging).
+
 Jersey
 ------
 

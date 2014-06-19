@@ -41,6 +41,7 @@ resolvers in ThisBuild ++= Seq(
 
 // dependencies
 libraryDependencies in ThisBuild ++= Seq(
+    "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
     "org.scalatest" %% "scalatest" % "2.1.0" % "test",
     "org.mockito" % "mockito-core" % "1.9.5" % "test"
 )
