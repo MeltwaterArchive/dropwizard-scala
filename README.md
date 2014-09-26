@@ -11,7 +11,7 @@ Just add a dependency to `dropwizard-scala-core` and `dropwizard-scala-jdbi` _(o
 ### SBT
 
 ```scala
-libraryDependencies += "net.nicktelford.dropwizard.scala" %% "dropwizard-scala-core" % "0.7.1-1"
+libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-core" % "0.7.1-1"
 ```
 
 ### Maven
@@ -20,7 +20,7 @@ Include the `dropwizard-scala-core` artifact in your POM:
 
 ```xml
 <dependency>
-    <groupId>net.nicktelford.dropwizard.scala</groupId>
+    <groupId>com.datasift.dropwizard.scala</groupId>
     <artifactId>dropwizard-scala-core_2.10.2</artifactId>
     <version>0.7.1-1</version>
 </dependency>
@@ -38,7 +38,7 @@ can use elsewhere to ensure coherence in your POM:
 
 <dependencies>
     <dependency>
-        <groupId>net.nicktelford.dropwizard.scala</groupId>
+        <groupId>com.datasift.dropwizard.scala</groupId>
         <artifactId>dropwizard-scala-core_${scala.version}</artifactId>
         <version>${dropwizard.scala.version}</version>
     </dependency>
@@ -53,7 +53,7 @@ Core
 
   ```scala
   import io.dropwizard.Configuration
-  import net.nicktelford.dropwizard.scala.ScalaApplication
+  import com.datasift.dropwizard.scala.ScalaApplication
   
   case class MyConfiguration(
     @NotEmpty greeting: String, 
@@ -100,7 +100,7 @@ JDBI
   * A more idiomatic JDBI API:
 
   ```scala
-  import net.nicktelford.dropwizard.scala.jdbi._
+  import com.datasift.dropwizard.scala.jdbi._
   
   val db = JDBI(dataSource)
   val dao = db.onDemand[MyDAO]
@@ -114,14 +114,14 @@ To enable Scala integration for JDBI, you will need to add an extra dependency:
 ### SBT
 
 ```scala
-libraryDependencies += "net.nicktelford.dropwizard.scala" %% "dropwizard-scala-jdbi" % "0.7.1-1"
+libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-jdbi" % "0.7.1-1"
 ```
 
 ### Maven
 
 ```xml
 <dependency>
-    <groupId>net.nicktelford.dropwizard.scala</groupId>
+    <groupId>com.datasift.dropwizard.scala</groupId>
     <artifactId>dropwizard-scala-jdbi_${scala.version}</artifactId>
     <version>${dropwizard.scala.version}</version>
 </dependency>
@@ -137,10 +137,10 @@ Validation
 
   * Validation of Scala `case class` properties using JSR-303 and Hibernate 
     Validator constraints. To validate a `case class`, you will need to use the
-    wrapper constraints defined in `net.nicktelford.dropwizard.scala.validation.constraints`:
+    wrapper constraints defined in `com.datasift.dropwizard.scala.validation.constraints`:
     
   ```scala
-  import net.nicktelford.dropwizard.scala.validation.constraints._
+  import com.datasift.dropwizard.scala.validation.constraints._
   
   case class MyConfiguration(
     @NotEmpty names: List[String], 
