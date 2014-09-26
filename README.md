@@ -55,10 +55,10 @@ Core
   import io.dropwizard.Configuration
   import com.datasift.dropwizard.scala.ScalaApplication
   
-  case class MyConfiguration(
-    @NotEmpty greeting: String, 
-    @NotNull greeters: List[String]
-  ) extends Configuration
+  class MyConfiguration extends Configuration {
+    @NotEmpty val greeting: String = "Hello, %s!"
+    @NotNull val greeters: List[String] = Nil
+  }
 
   object MyApplication extends ScalaApplication[MyConfiguration] {
     def init(bootstrap: Bootstrap[MyConfiguration]) {
@@ -142,10 +142,10 @@ Validation
   ```scala
   import com.datasift.dropwizard.scala.validation.constraints._
   
-  case class MyConfiguration(
-    @NotEmpty names: List[String], 
-    @Min(0) age: Int
-  ) extends Configuration
+  class MyConfiguration extends Configuration {
+    @NotEmpty val names: List[String] = Nil
+    @Min(0) val age: Int = 20
+  }
   ```
 
 ### Limitations
