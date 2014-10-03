@@ -1,6 +1,6 @@
 package com.datasift.dropwizard.scala
 
-import reflect.{ClassTag, classTag}
+import scala.reflect._
 
 import org.skife.jdbi.v2._
 import org.skife.jdbi.v2.sqlobject.mixins.Transactional
@@ -9,11 +9,13 @@ import org.skife.jdbi.v2.tweak.HandleCallback
 /** Global definitions and implicits for JDBI. */
 package object jdbi {
 
+  implicit final def JDBIWrapper(db: DBI) = new JDBIWrapper(db)
+
   /** Provides idiomatic Scala enhancements to the JDBI API.
     *
     * @param db the [[org.skife.jdbi.v2.DBI]] instance to wrap.
     */
-  implicit class JDBIWrapper(db: DBI) {
+  class JDBIWrapper private[jdbi](db: DBI) {
 
     /** Creates a typed DAO instance.
      *
@@ -103,11 +105,13 @@ package object jdbi {
     }
   }
 
+  implicit final def HandleWrapper(handle: Handle) = new HandleWrapper(handle)
+
   /** Provides idiomatic Scala enhancements to the JDBI API.
     *
     * @param handle the [[org.skife.jdbi.v2.Handle]] instance to wrap.
     */
-  implicit class HandleWrapper(handle: Handle) {
+  class HandleWrapper private[jdbi] (handle: Handle) {
 
     /** Creates a typed DAO instance attached to this [[org.skife.jdbi.v2.Handle]].
       *
@@ -179,11 +183,14 @@ package object jdbi {
     }
   }
 
+  implicit final def TransactionalWrapper[A <: Transactional[A]](transactional : A) =
+    new TransactionalWrapper[A](transactional)
+
   /** Provides enhancements to the Dropwizard jDBI API for transactional DAOs.
     *
     * @param transactional the [[org.skife.jdbi.v2.sqlobject.mixins.Transactional]] object to wrap.
     */
-  implicit class TransactionalWrapper[A <: Transactional[A]](transactional: A) {
+  class TransactionalWrapper[A <: Transactional[A]] private[jdbi] (transactional: A) {
 
     /** Executes the given function within a transaction of the given isolation level.
       *

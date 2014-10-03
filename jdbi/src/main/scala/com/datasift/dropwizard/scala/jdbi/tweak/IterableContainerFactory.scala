@@ -1,7 +1,5 @@
 package com.datasift.dropwizard.scala.jdbi.tweak
 
-import scala.language.higherKinds
-
 import org.skife.jdbi.v2.ContainerBuilder
 import org.skife.jdbi.v2.tweak.ContainerFactory
 import scala.collection.generic.CanBuildFrom

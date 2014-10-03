@@ -1,3 +1,5 @@
+val ScalaVersion = "(\\d+)\\.(\\d+).*".r
+
 // basic facts
 name := "Dropwizard Scala"
 
@@ -20,15 +22,16 @@ scmInfo in ThisBuild := Some(ScmInfo(
 ))
 
 
-crossScalaVersions in ThisBuild := Seq("2.10.4")
+crossScalaVersions in ThisBuild := Seq("2.9.1", "2.9.3", "2.10.4")
 
 // compile more strictly
-scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
+scalacOptions <<= scalaVersion map { v =>
+  val options = "-deprecation" :: "-unchecked" :: Nil
+  if (v.startsWith("2.9.")) options else "-target:jvm-1.7" :: "-language:higherKinds" :: "-feature" :: options
+}
 
 // ensure JDK 1.7+
 javacOptions in ThisBuild ++= Seq("-source", "1.7", "-target", "1.7")
-
-scalacOptions in ThisBuild += "-target:jvm-1.7"
 
 // use local Maven repo and Sonatype snapshots for resolving dependencies
 resolvers in ThisBuild ++= Seq(
@@ -37,16 +40,26 @@ resolvers in ThisBuild ++= Seq(
 )
 
 // dependencies
-libraryDependencies in ThisBuild ++= Seq(
-    "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
-    "org.scalatest" %% "scalatest" % "2.1.0" % "test",
+libraryDependencies in ThisBuild <++= scalaBinaryVersion { scalaVersion =>
+  val scalaTest = scalaVersion match {
+    case "2.9.3" | "2.9.2" | "2.9.1" | "2.9.0" => "2.0.M5b"
+    case "2.10" | "2.11"                       => "2.1.0"
+  }
+  Seq(
+    "org.scalatest" %% "scalatest" % scalaTest % "test",
     "org.mockito" % "mockito-core" % "1.9.5" % "test"
-)
+  ) ++ (scalaVersion match {
+    // note: scala-logging is only available for Scala 2.10+
+    case "2.10" | "2.11" => Seq("com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2")
+    case _ => Seq.empty
+  })
+}
 
 // aggregate sub-modules
-lazy val parent = project.in(file(".")).aggregate(core, jersey, jdbi, validation)
+lazy val parent = project.in(file("."))
+    .aggregate(core, jersey, jdbi, validation, metrics)
 
-lazy val core = project.dependsOn(jersey).dependsOn(validation)
+lazy val core: Project = project.dependsOn(jersey).dependsOn(validation)
 
 lazy val jersey = project
 
@@ -54,3 +67,4 @@ lazy val validation = project
 
 lazy val jdbi = project
 
+lazy val metrics = project

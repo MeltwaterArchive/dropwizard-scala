@@ -6,7 +6,7 @@ import com.datasift.dropwizard.scala.validation.validators._
 import org.hibernate.validator.internal.engine.ValidatorFactoryImpl
 import org.hibernate.validator.internal.metadata.core.ConstraintHelper
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect._
 import scala.collection.JavaConverters.seqAsJavaListConverter
 
 import java.util

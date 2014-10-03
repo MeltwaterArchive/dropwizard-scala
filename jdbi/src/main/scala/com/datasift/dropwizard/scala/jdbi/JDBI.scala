@@ -4,9 +4,7 @@ import io.dropwizard.db.DataSourceFactory
 import io.dropwizard.setup.Environment
 import io.dropwizard.jdbi.DBIFactory
 import org.skife.jdbi.v2._
-import org.skife.jdbi.v2.tweak.HandleCallback
 
-import scala.reflect.{ClassTag, classTag}
 import com.datasift.dropwizard.scala.jdbi.tweak.{OptionContainerFactory, OptionArgumentFactory, IterableContainerFactory}
 
 /** Factory object for [[org.skife.jdbi.v2.DBI]] instances. */
