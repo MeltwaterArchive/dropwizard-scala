@@ -81,6 +81,29 @@ Core
   * A `Logging` trait and macro-derived conditional logging, courtesey of 
     [Scala Logging](https://github.com/typesafehub/scala-logging).
 
+Metrics
+-------
+
+  * A more idiomatic API for metrics is provided by `com.datasift.dropwizard.scala.metrics._`.
+  
+```
+import com.codahale.metrics._
+import com.datasift.dropwizard.scala.metrics._
+
+class MyApplication extends ScalaApplication[MyConfiguration] {
+  def run (conf: MyConfiguration, env: Environment) {
+    env.metrics.gauge("things.current_time") {
+      System.currentTimeMillis()
+    }
+    
+    env.metrics.timer("things.some_timer") {
+      // do something and time the execution
+    }
+  }
+}
+
+```
+
 Jersey
 ------
 

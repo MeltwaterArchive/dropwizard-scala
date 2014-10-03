@@ -1,22 +1,27 @@
 package com.datasift.dropwizard.scala
 
+import com.codahale.metrics
 import com.codahale.metrics._
 import com.datasift.dropwizard.scala.metrics._
+import io.dropwizard.util.Duration
 import org.scalatest.FlatSpec
+
+import scala.collection.JavaConverters.mapAsScalaMapConverter
 
 class MetricImplicitsSpec extends FlatSpec {
 
+  class TestClock(var tick: Long = 0) extends Clock {
+    override def getTick = tick
+  }
+
   "Timer" should "time execution of a function" in {
 
-    object TestClock extends Clock {
-      var tick = 0
-      override def getTick = tick
-    }
 
-    val timer = new Timer(new UniformReservoir(), TestClock)
-    timer.time { TestClock.tick += 1 }
+    val clock = new TestClock(0)
+    val timer = new Timer(new UniformReservoir(), clock)
+    timer.time { clock.tick += 1 }
 
-    assert(TestClock.tick === 1)
+    assert(clock.tick === 1)
   }
 
   "Counter" should "increment using +=" in {
@@ -52,5 +57,39 @@ class MetricImplicitsSpec extends FlatSpec {
     histogram += int
     assert(histogram.getCount === 1)
     assert(histogram.getSnapshot.getValues === Array(int))
+  }
+
+  "MetricRegistry" should "register a gauge for an arbitrary function" in {
+    val registry = new MetricRegistry
+    var value = 5
+    val gauge = registry.gauge("test.gauge")(value)
+    assert(registry.getGauges.asScala === Map("test.gauge" -> gauge))
+    assert(gauge.getValue === value)
+    value = 15
+    assert(gauge.getValue === value)
+  }
+
+  it should "register a cached gauge for an arbitrary function" in {
+    val registry = new MetricRegistry
+    var value = 5
+    val clock = new TestClock(0)
+    val gauge = registry.gauge("test.gauge", clock, Duration.nanoseconds(5))(value)
+    assert(registry.getGauges.asScala === Map("test.gauge" -> gauge))
+    assert(gauge.getValue === value)
+    val oldValue = value
+    value = 50
+    assert(gauge.getValue === oldValue)
+    clock.tick = 4
+    assert(gauge.getValue === oldValue)
+    clock.tick = 5
+    assert(gauge.getValue === value)
+  }
+
+  "Gauge" should "be transformable by another function" in {
+    val registry = new MetricRegistry
+    val gauge = registry.gauge("test.gauge")(50)
+    val transformed = gauge.map(2*)
+    assert(gauge.getValue === 50)
+    assert(transformed.getValue === 100)
   }
 }
