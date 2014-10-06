@@ -1,5 +1,6 @@
 package com.datasift.dropwizard.scala
 
+import io.dropwizard.util.Duration
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
 import com.datasift.dropwizard.scala.validation.constraints._
@@ -18,7 +19,6 @@ import org.eclipse.jetty.server.Server
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
 
-import scala.concurrent.duration._
 import scala.util.{Try, Success}
 
 case class ScalaTestConfiguration(
@@ -57,7 +57,7 @@ object ApplicationHarness {
   def retryWithDelay[A](attempts: Int, delay: Duration)
                        (f: => A): Try[A] = retry(attempts, 0) { attempt =>
     if (attempt > 1) {
-      Thread.sleep(delay.toMillis)
+      Thread.sleep(delay.toMilliseconds)
     }
     f
   }
@@ -65,7 +65,7 @@ object ApplicationHarness {
   def retryWithDelay[A](attempts: Int, initialDelay: Duration, maxDelay: Duration)
                        (f: => A): Try[A] = retry(attempts, 0) { attempt =>
     if (attempt > 1) {
-      Thread.sleep(math.min(math.pow(initialDelay.toMillis, attempt).toLong, maxDelay.toMillis))
+      Thread.sleep(math.min(math.pow(initialDelay.toMilliseconds, attempt).toLong, maxDelay.toMilliseconds))
     }
     f
   }
@@ -94,7 +94,7 @@ case class ApplicationHarness[C <: Configuration](app: Application[C], configPat
     val command = new ServerCommand[C](app)
     val namespace = new Namespace(ImmutableMap.of("file", configPath))
     command.run(bootstrap, namespace)
-    retryWithDelay(5, Duration(1, SECONDS)) {
+    retryWithDelay(5, Duration.seconds(1)) {
       jettyServer match {
         case null => throw new RuntimeException("Jetty Server failed to start.")
         case x if !x.isRunning => throw new RuntimeException("Jetty Server started but is not running.")

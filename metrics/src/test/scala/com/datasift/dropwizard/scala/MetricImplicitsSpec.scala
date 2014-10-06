@@ -1,6 +1,5 @@
 package com.datasift.dropwizard.scala
 
-import com.codahale.metrics
 import com.codahale.metrics._
 import com.datasift.dropwizard.scala.metrics._
 import io.dropwizard.util.Duration

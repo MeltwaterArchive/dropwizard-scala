@@ -21,7 +21,7 @@ class CollectionQueryParamInjectableSpec extends FlatSpec with MockitoSugar {
   val extracted = new Object
 
   when(context.getUriInfo) thenReturn uriInfo
-  when(extractor.extract(is(params))) thenReturn (extracted, Nil: _*)
+  when(extractor.extract(is(params))) thenReturn (extracted, Array.empty[Object]: _*)
 
   "A decoding ScalaCollectionQueryParamInjectable" should "extract query parameters" in {
     val injectable = new CollectionQueryParamInjectable(extractor, true)
