@@ -35,8 +35,8 @@ object JDBI {
     // register scala type factories
     dbi.registerArgumentFactory(new OptionArgumentFactory(conf.getDriverClass))
     dbi.registerContainerFactory(new OptionContainerFactory)
-    dbi.registerContainerFactory(new IterableContainerFactory[Seq])
-    dbi.registerContainerFactory(new IterableContainerFactory[Set])
+    dbi.registerContainerFactory(new IterableContainerFactory[scala.collection.Seq])
+    dbi.registerContainerFactory(new IterableContainerFactory[scala.collection.Set])
 
     dbi
   }
