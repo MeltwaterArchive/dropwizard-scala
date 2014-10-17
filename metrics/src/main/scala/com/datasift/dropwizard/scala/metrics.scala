@@ -54,7 +54,7 @@ object metrics {
   
   class TimerWrapper private[metrics] (t: Timer) {
 
-    def time[A](f: => A): A = {
+    def timed[A](f: => A): A = {
       val ctx = t.time()
       val res = f
       ctx.stop()

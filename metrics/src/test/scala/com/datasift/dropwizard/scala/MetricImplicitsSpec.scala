@@ -18,7 +18,7 @@ class MetricImplicitsSpec extends FlatSpec {
 
     val clock = new TestClock(0)
     val timer = new Timer(new UniformReservoir(), clock)
-    timer.time { clock.tick += 1 }
+    timer.timed { clock.tick += 1 }
 
     assert(clock.tick === 1)
   }
