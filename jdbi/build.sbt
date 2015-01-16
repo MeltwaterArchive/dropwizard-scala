@@ -13,3 +13,6 @@ unmanagedSourceDirectories in Compile <+= (sourceDirectory in Compile, scalaBina
   case (s, v) if v.startsWith("2.9.") => s / "scala_2.9"
   case (s, v) => s / ("scala_" + v)
 }
+
+publishTo <<= version(repository)
+

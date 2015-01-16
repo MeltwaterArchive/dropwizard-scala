@@ -14,3 +14,6 @@ libraryDependencies ++= Seq(
 unmanagedSourceDirectories in Compile <+= (sourceDirectory in Compile, scalaBinaryVersion) {
   case (s, v) => s / ("scala_" + v)
 }
+
+publishTo <<= version(repository)
+
