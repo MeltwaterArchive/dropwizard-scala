@@ -57,6 +57,7 @@ libraryDependencies in ThisBuild <++= scalaBinaryVersion { scalaVersion =>
 
 // aggregate sub-modules
 lazy val parent = project.in(file("."))
+    .settings(publishArtifact := false)
     .aggregate(core, jersey, jdbi, validation, metrics)
 
 lazy val core: Project = project.dependsOn(jersey).dependsOn(validation)
