@@ -28,7 +28,8 @@ package object constraints {
   type CreditCardNumber = hibernate.CreditCardNumber @field @param
   type Email = hibernate.Email @field @param
   type Length = hibernate.Length @field @param
-  type ModCheck = hibernate.ModCheck @field @param
+  type Mod10Check = hibernate.Mod10Check @field @param
+  type Mod11Check = hibernate.Mod11Check @field @param
   type NotBlank = hibernate.NotBlank @field @param
   type NotEmpty = hibernate.NotEmpty @field @param
   type Range = hibernate.Range @field @param
