@@ -11,7 +11,7 @@ object Versions {
 
   val mockito = "1.9.5"
 
-  val project  = Versions.dropwizard + "-2-SNAPSHOT"
+  val project  = Versions.dropwizard + "-2"
 }
 
 case class Versions(scalaBinaryVersion: String) {
