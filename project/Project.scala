@@ -106,7 +106,7 @@ object DropwizardScala extends Build {
   def module(id: String): sbt.Project = module(id, file(id), Nil)
   def module(id: String, file: sbt.File, settings: Seq[Def.Setting[_]]): sbt.Project = {
     Project(id, file, settings = buildSettings ++ settings ++ Seq(
-      name := "(%s)".format(id),
+      name := "Dropwizard Scala %s".format(id),
       normalizedName := "dropwizard-scala-%s".format(id)
     ))
   }
