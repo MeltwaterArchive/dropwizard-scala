@@ -4,16 +4,6 @@ import Keys._
 import sbtrelease.ReleasePlugin._
 import sbtrelease.ReleasePlugin.ReleaseKeys._
 
-/*
-import PgpKeys._
-import sbtrelease._
-import ReleaseKeys._
-import ReleaseStateTransformations._
-
-// use maven style tag name
-tagName <<= (name, version in ThisBuild) map { (n,v) => n + "-" + v }
- */
-
 object Versions {
 
   val dropwizard = "0.7.1"
