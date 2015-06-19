@@ -73,7 +73,7 @@ object DropwizardScala extends Build {
       connection = "git://github.com/dropwizard/dropwizard-scala.git",
       devConnection = Option("git@github.com@:dropwizard/dropwizard-scala.git")
     )),
-    crossScalaVersions := Seq("2.9.1", "2.9.3", "2.10.4"),
+    crossScalaVersions := Seq("2.9.1", "2.9.3", "2.10.5"),
     scalacOptions <++= scalaBinaryVersion.map(CompileOptions.scala),
     javacOptions ++= CompileOptions.java,
     resolvers in ThisBuild ++= Seq(
