@@ -56,8 +56,11 @@ object metrics {
 
     def timed[A](f: => A): A = {
       val ctx = t.time()
-      val res = f
-      ctx.stop()
+      val res = try {
+        f
+      } finally {
+        ctx.stop()
+      }
       res
     }
   }
