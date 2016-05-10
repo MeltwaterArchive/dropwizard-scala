@@ -107,12 +107,25 @@ class MyApplication extends ScalaApplication[MyConfiguration] {
 Jersey
 ------
 
-  * Jersey support for Scala collections and `Option` in resource method 
-    parameters and for request/response entities.
+  * Support for `Option` in resource method parameters and for request/response
+    entities.
 
-  * Jersey support for Scala's native `Boolean`, `Int` and `Long` types 
-    in resource method parameters via the `BooleanParam`, `IntParam` and 
-    `LongParam` wrapper types.
+  * Support for `Either[L, R]` in resource method parameters, where `L` and `R`
+    are both types Jersey supports for parameters. By convention, it will
+    attempt to decode the parameter first in to the right-side as an `R`, and if
+    that fails, in to the left-side as an `L`.
+
+  * Support for `Seq[A]`, `List[A]`, `Vector[A]`, `IndexedSeq[A]` and `Set[A]`
+    in resource method parameters, where `A` is any non-collection type that
+    Jersey supports for parameters. This is the same limitation imposed on Java
+    collections.
+
+  * Support for `BigInt` and `BigDecimal` in resource method parameters and
+    request/response entities.
+
+  * Support for Scala's native `Boolean`, `Int` and `Long` types in resource
+    method parameters via the `BooleanParam`, `IntParam` and `LongParam` wrapper
+    types.
 
 JDBI
 ----

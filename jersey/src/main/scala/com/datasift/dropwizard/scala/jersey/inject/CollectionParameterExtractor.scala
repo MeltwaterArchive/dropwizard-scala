@@ -1,12 +1,25 @@
 package com.datasift.dropwizard.scala.jersey.inject
 
+import org.glassfish.jersey.server.internal.inject.MultivaluedParameterExtractor
+
 import collection.generic.CanBuildFrom
-import com.sun.jersey.server.impl.model.parameter.multivalued.MultivaluedParameterExtractor
 import javax.ws.rs.core.MultivaluedMap
 
 import scala.collection.JavaConverters.iterableAsScalaIterableConverter
-import com.sun.jersey.spi.StringReader
 import scala.annotation.unchecked.{uncheckedVariance => uV}
+import scala.reflect.ClassTag
+
+object CollectionParameterExtractor {
+
+  def apply[Col[_] <: TraversableOnce[_]]
+           (name: String,
+            defaultValue: Option[String],
+            fromString: String => Any)
+           (implicit bf: CanBuildFrom[Nothing, Any, Col[Any @uV]],
+                     ct: ClassTag[Col[_]]): MultivaluedParameterExtractor[_] = {
+    new CollectionParameterExtractor[Any, Col](name, defaultValue, fromString)
+  }
+}
 
 /** A parameter extractor for Scala collections with elements decoded by a function.
   *
@@ -16,21 +29,22 @@ import scala.annotation.unchecked.{uncheckedVariance => uV}
   * @param defaultValue the default value of the collection for when the parameter does not exist.
   * @param fromString a function to parse collection elements from a string
   * @param bf the implicit builder for the collection type.
-  *
-  * @see [[com.sun.jersey.server.impl.model.parameter.multivalued.MultivaluedParameterExtractor]]
+  * @see [[MultivaluedParameterExtractor]]
   */
 class CollectionParameterExtractor[A, Col[_] <: TraversableOnce[_]]
-                                  (name: String, defaultValue: String, fromString: String => A)
+                                  (name: String,
+                                   defaultValue: Option[String],
+                                   fromString: String => A)
                                   (implicit bf: CanBuildFrom[Nothing, A, Col[A @uV]])
-  extends MultivaluedParameterExtractor {
+  extends MultivaluedParameterExtractor[Col[A]] {
 
-  private val default = Option(defaultValue).toIterable
+  private val default = defaultValue.toIterable
 
-  def getName = name
+  override def getName = name
 
-  def getDefaultStringValue = defaultValue
+  override def getDefaultValueString = defaultValue.orNull
 
-  def extract(parameters: MultivaluedMap[String, String]): Object = {
+  override def extract(parameters: MultivaluedMap[String, String]): Col[A] = {
     val t = Option(parameters.get(name))
       .map(_.asScala)
       .getOrElse(default)
@@ -38,38 +52,7 @@ class CollectionParameterExtractor[A, Col[_] <: TraversableOnce[_]]
 
     val b = bf()
     b.sizeHint(t)
-    b ++= t.asInstanceOf[Traversable[A]]
-    b.result().asInstanceOf[Object]
-
-      // .to[Col](bf)
-      //.asInstanceOf[Object]
+    b ++= t
+    b.result()
   }
 }
-
-/** A parameter extractor for Scala collections with elements decoded by a Jersey StringReader.
- *
- * @param name the name of the parameter to extract the collection for.
- * @param defaultValue the default value of the collection for when the parameter does not exist.
- * @param sr the StringReader to parse collection elements.
- * @param bf the implicit builder for the collection type.
- *
- * @tparam A type of the elements in the collection.
- * @tparam Col type of the collection to extract.
- */
-class StringReaderCollectionParameterExtractor[A, Col[_] <: Iterable[_]]
-                                              (name: String, defaultValue: String, sr: StringReader[A])
-                                              (implicit bf: CanBuildFrom[Nothing, A, Col[A @uV]])
-  extends CollectionParameterExtractor[A, Col](name, defaultValue, sr.fromString)(bf)
-
-/** A parameter extractor for Scala collections with String elements.
-  *
- * @param name the name of the parameter to extract the collection for.
- * @param defaultValue the default value of the collection for when the parameter does not exist.
- * @param bf the implicit builder for the collection type.
- *
- * @tparam Col type of the collection to extract.
- */
-class StringCollectionParameterExtractor[Col[_] <: Iterable[_]]
-                                        (name: String, defaultValue: String)
-                                        (implicit bf: CanBuildFrom[Nothing, String, Col[String @uV]])
-  extends CollectionParameterExtractor[String, Col](name, defaultValue, identity)(bf)

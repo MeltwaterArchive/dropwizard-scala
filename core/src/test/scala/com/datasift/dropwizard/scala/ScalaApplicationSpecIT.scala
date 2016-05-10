@@ -1,5 +1,7 @@
 package com.datasift.dropwizard.scala
 
+import javax.ws.rs.client.Client
+
 import io.dropwizard.util.Duration
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
@@ -12,7 +14,6 @@ import io.dropwizard.{Configuration, Application}
 
 import com.google.common.io.Resources
 import com.google.common.collect.ImmutableMap
-import com.sun.jersey.api.client.Client
 import net.sourceforge.argparse4j.inf.Namespace
 import org.eclipse.jetty.server.Server
 
@@ -30,9 +31,54 @@ case class ScalaTestConfiguration(
 @Produces(Array(MediaType.APPLICATION_JSON))
 @Path("/") class ScalaTestResource(greeting: String, names: List[String]) {
 
-  @GET def greet: List[String] = greetWithNames(names)
+  @GET def greet = greetWithList(names)
 
-  @POST def greetWithNames(names: List[String]) = names.map(greeting.format(_))
+  @GET @Path("/maybe")
+  def greetOrNotFound(@QueryParam("name") name: Option[String]): Option[List[String]] =
+    name.map(greeting.format(_)).map(List(_))
+
+  @GET @Path("/option")
+  def greetWithOption(@QueryParam("name") name: Option[String]): List[String] =
+    name.map(greeting.format(_)).toList
+
+  @GET @Path("/list")
+  def greetWithList(@QueryParam("names") names: List[String]): List[String] =
+    greetNames(names)
+
+  @GET @Path("/set")
+  def greetWithSet(@QueryParam("names") names: Set[String]): List[String] =
+    greetNames(names)
+
+  @GET @Path("/vector")
+  def greetWithVector(@QueryParam("names") names: Vector[String]): List[String] =
+    greetNames(names)
+
+  @GET @Path("/seq")
+  def greetWithSeq(@QueryParam("names") names: Seq[String]): List[String] =
+    greetNames(names)
+
+  @GET @Path("/complex")
+  def complexQuery(@QueryParam("names") names: Set[java.math.BigDecimal]): Option[Int] =
+    names.headOption.map(_ multiply new java.math.BigDecimal(2)).map(_.intValue)
+
+  @GET @Path("/complex_scala")
+  def complexQueryScala(@QueryParam("names") names: Set[BigDecimal]): Option[Int] =
+    names.headOption.map(_ * BigDecimal(2)).map(_.toInt)
+
+  @GET @Path("/bigint")
+  def bigint(@QueryParam("int") int: BigInt): Int = int.intValue
+
+  @GET @Path("/either")
+  def either(@QueryParam("name") name: Either[String, Integer]): String = {
+    name match {
+      case Left(v) => greeting.format(v)
+      case Right(v) => v.toString
+    }
+  }
+
+  private def greetNames(names: Iterable[String]): List[String] =
+    names.map(greeting.format(_)).toList
+
 }
 
 class ScalaTestApp extends ScalaApplication[ScalaTestConfiguration] {
@@ -81,6 +127,7 @@ case class ApplicationHarness[C <: Configuration](app: Application[C], configPat
     var configuration: Configuration = null
     val bootstrap = new Bootstrap(app) {
       override def run(conf: C, env: Environment) {
+        super.run(conf, env)
         environment = env
         configuration = conf
         env.lifecycle().addServerLifecycleListener(new ServerLifecycleListener {
@@ -135,26 +182,198 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
 
   "GET /" should "greet with configured names" in {
     val expected = app.configuration.map(conf => conf.names.map(conf.greeting.getOrElse("%s").format(_)))
-    val result = app.request { (client, server) => client.resource(server.getURI).get(classOf[Array[String]]).toList }
-    assert(result.isSuccess)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI)
+        .request()
+        .get(classOf[Array[String]])
+        .toList
+    }
     assert(result === expected)
   }
 
-  "POST /" should "not greet anyone when no names supplied" in {
+  "GET /list" should "not greet anyone when no names supplied" in {
     val expected = Success(List.empty[String])
-    val result = app.request { (client, server) => client.resource(server.getURI).`type`(MediaType.APPLICATION_JSON).post(classOf[Array[String]], List.empty[String]).toList }
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/list"))
+        .queryParam("names")
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[List[String]])
+    }
     result.recover {
       case t => throw new RuntimeException(t)
     }
     assert(result === expected)
   }
 
-  it should "greet with supplied names" in {
+  "GET /list" should "greet with supplied names" in {
     val fixture = "Michael" :: "Andrew" :: "Lisa" :: Nil
     val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)))
-    val result = app.request { (client, server) => client.resource(server.getURI).`type`(MediaType.APPLICATION_JSON).post(classOf[Array[String]], fixture).toList }
-    assert(result.isSuccess)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/list"))
+        .queryParam("names", fixture: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[List[String]])
+    }
     assert(result === expected)
   }
 
+  "GET /seq" should "greet with supplied names" in {
+    val fixture = List("Michael", "Andrew", "Lisa")
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSeq)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/seq"))
+        .queryParam("names", fixture: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Seq[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /vector" should "greet with supplied names" in {
+    val fixture = List("Michael", "Andrew", "Lisa")
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toVector)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/vector"))
+        .queryParam("names", fixture: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Vector[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /set" should "greet with supplied names" in {
+    val fixture = List("Michael", "Andrew", "Lisa", "Lisa")
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSet)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/set"))
+        .queryParam("names", fixture: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Set[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /option" should "greet with supplied name" in {
+    val fixture = Option("Nick")
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/option"))
+        .queryParam("name", fixture.orNull)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Iterable[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /option with no name" should "not greet" in {
+    val fixture: Option[String] = None
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/option"))
+        .queryParam("name", fixture.orNull)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Iterable[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /maybe" should "greet with supplied name" in {
+    val fixture = Option("Nick")
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/maybe"))
+        .queryParam("name", fixture.orNull)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Iterable[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /maybe with no name" should "present Not Found error" in {
+    val fixture: Option[String] = None
+    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/maybe"))
+        .queryParam("name", fixture.orNull)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Iterable[String]])
+    }
+    assert(result.isFailure)
+    assert(result.recover { case t: NotFoundException => Nil}.isSuccess)
+  }
+
+  "GET /complex" should "yield results" in {
+    val fixture: Set[java.math.BigDecimal] = Set(new java.math.BigDecimal(1), new java.math.BigDecimal(2))
+    val expected = 2
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/complex"))
+        .queryParam("names", fixture.toSeq: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Int])
+    }
+    assert(result === Success(expected))
+  }
+
+  "GET /complex_scala" should "yield results" in {
+    val fixture: Set[BigDecimal] = Set(BigDecimal(1), BigDecimal(2))
+    val expected = 2
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/complex_scala"))
+        .queryParam("names", fixture.toSeq: _*)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Int])
+    }
+    assert(result === Success(expected))
+  }
+
+  "GET /either" should "yield right side" in {
+    val fixture = 2
+    val expected = "2"
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/either"))
+        .queryParam("name", fixture.toString)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[String])
+    }
+    assert(result === Success(expected))
+  }
+
+  "GET /either" should "yield left side" in {
+    val fixture = "Nick"
+    val expected = app.configuration.map(_.greeting.getOrElse("%s").format(fixture))
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/either"))
+        .queryParam("name", fixture)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[String])
+    }
+    assert(result === expected)
+  }
+
+  "GET /bigint" should "yield the number" in {
+    val fixture = BigInt(500)
+    val expected = 500
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/bigint"))
+        .queryParam("int", fixture.toString)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[Int])
+    }
+    assert(result === Success(expected))
+  }
 }

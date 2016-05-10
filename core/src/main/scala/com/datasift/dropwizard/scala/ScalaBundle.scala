@@ -1,8 +1,7 @@
 package com.datasift.dropwizard.scala
 
+import com.datasift.dropwizard.scala.jersey.inject.{ScalaInjectionBinder, OptionMessageBodyWriter}
 import io.dropwizard.setup.{Bootstrap, Environment}
-import com.datasift.dropwizard.scala.jersey.inject.CollectionsQueryParamInjectableProvider
-import com.datasift.dropwizard.scala.jersey.dispatch.OptionResourceMethodDispatchAdapter
 import io.dropwizard.Bundle
 
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -13,15 +12,15 @@ class ScalaBundle extends Bundle {
 
   val validatorsBundle = new ScalaValidatorsBundle
 
-  def initialize(bootstrap: Bootstrap[_]) {
+  override def initialize(bootstrap: Bootstrap[_]) {
     bootstrap.getObjectMapper.registerModule(new DefaultScalaModule)
     validatorsBundle.initialize(bootstrap)
   }
 
-  def run(environment: Environment) {
+  override def run(environment: Environment) {
     val jersey = environment.jersey()
-    jersey.register(new CollectionsQueryParamInjectableProvider)
-    jersey.register(new OptionResourceMethodDispatchAdapter)
+    jersey.register(new OptionMessageBodyWriter)
+    jersey.register(new ScalaInjectionBinder)
     validatorsBundle.run(environment)
   }
 }

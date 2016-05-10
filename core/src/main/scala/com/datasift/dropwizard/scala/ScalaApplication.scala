@@ -34,7 +34,7 @@ trait ScalaApplication[A <: Configuration] extends Application[A] {
     * @param args the command-line arguments the program was invoked with.
     */
   final def main(args: Array[String]) {
-    run(args)
+    run(args: _*)
   }
 
   /** Service initialization.

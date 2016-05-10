@@ -32,8 +32,8 @@ class ScalaValidatorsSpec extends FlatSpec {
   )
 
   object MockApplication extends Application[Configuration] {
-    def run(configuration: Configuration, environment: Environment) {}
-    def initialize(bootstrap: Bootstrap[Configuration]) {}
+    override def run(configuration: Configuration, environment: Environment) {}
+    override def initialize(bootstrap: Bootstrap[Configuration]) {}
   }
 
   val bootstrap = new Bootstrap[Configuration](MockApplication)

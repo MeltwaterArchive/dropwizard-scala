@@ -1,17 +1,15 @@
 import sbt._
 import Keys._
-
-import sbtrelease.ReleasePlugin._
-import sbtrelease.ReleasePlugin.ReleaseKeys._
+import sbtrelease.ReleasePlugin.autoImport._
 
 object Versions {
 
-  val dropwizard = "0.7.1"
-  val jackson = "2.3.3"
+  val dropwizard = "0.8.5"
+  val jackson = "2.5.1"
 
-  val mockito = "1.9.5"
+  val mockito = "1.10.19"
 
-  val project  = Versions.dropwizard + "-3-SNAPSHOT"
+  val project  = Versions.dropwizard + "-1-SNAPSHOT"
 }
 
 case class Versions(scalaBinaryVersion: String) {
@@ -21,8 +19,7 @@ case class Versions(scalaBinaryVersion: String) {
 
   val mockito = Versions.mockito
   val scalaTest = scalaBinaryVersion match {
-    case "2.10" | "2.11"           => "2.1.0"
-    case v if v.startsWith("2.9.") => "2.0.M5b"
+    case "2.10" | "2.11" => "2.2.6"
   }
 }
 
@@ -44,25 +41,26 @@ case class Dependencies(scalaBinaryVersion: String) {
 
 object CompileOptions {
 
-  def scala(scalaBinaryVersion: String): Seq[String] =
+  def scala(scalaVersion: String): Seq[String] =
     "-deprecation" ::
       "-unchecked" ::
-      (scalaBinaryVersion match {
-        case v if !v.startsWith("2.9.") =>
-          "-target:jvm-1.7" ::
-            "-language:implicitConversions" ::
-            "-language:higherKinds" ::
-            "-feature" ::
-            Nil
-        case _ => Nil
-      })
+      "-language:implicitConversions" ::
+      "-language:higherKinds" ::
+      "-feature" ::
+      (scalaVersion match {
+        case v if v.startsWith("2.11.") && v.stripSuffix("2.11.").toInt > 4 =>
+          "-target:jvm-1.8"
+        case _ =>
+          "-target:jvm-1.7"
+      }) ::
+      Nil
 
-  val java: Seq[String] = Seq("-source", "1.7", "-target", "1.7")
+  val java: Seq[String] = Seq("-source", "1.8", "-target", "1.8")
 }
 
 object DropwizardScala extends Build {
 
-  val buildSettings = super.settings ++ releaseSettings ++ Seq(
+  val buildSettings = super.settings ++ Seq(
     description := "Scala language integration for the Dropwizard project.",
     homepage := Option(url("http://github.com/datasift/dropwizard-scala")),
     startYear := Option(2014),
@@ -73,8 +71,8 @@ object DropwizardScala extends Build {
       connection = "git://github.com/dropwizard/dropwizard-scala.git",
       devConnection = Option("git@github.com@:dropwizard/dropwizard-scala.git")
     )),
-    crossScalaVersions := Seq("2.9.1", "2.9.3", "2.10.5"),
-    scalacOptions <++= scalaBinaryVersion.map(CompileOptions.scala),
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    scalacOptions <++= scalaVersion.map(CompileOptions.scala),
     javacOptions ++= CompileOptions.java,
     resolvers in ThisBuild ++= Seq(
       "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
@@ -96,11 +94,10 @@ object DropwizardScala extends Build {
       </developers>
     },
     unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
-      case (s, v) if v.startsWith("2.9.") => s / ("scala_" + v) :: s / "scala_2.9" :: Nil
       case (s, v) => s / ("scala_" + v) :: Nil
     },
     version := Versions.project,
-    tagName <<= (name, version in ThisBuild) map { (n,v) => n + "-" + v }
+    releaseTagName <<= (name, version in ThisBuild) map { (n,v) => n + "-" + v }
   )
 
   def module(id: String): sbt.Project = module(id, file(id), Nil)
