@@ -78,8 +78,9 @@ Core
     enabling (de)serialization of Scala collections/case classes in 
     configurations and within Jersey request/response entities.
 
-  * A `Logging` trait and macro-derived conditional logging, courtesey of 
-    [Scala Logging](https://github.com/typesafehub/scala-logging).
+  * `log4s` is provided automatically, via a transitive dependency. To use it,
+    simply `import org.log4s._`. See http://github.com/log4s/log4s for more
+    details.
 
 Metrics
 -------

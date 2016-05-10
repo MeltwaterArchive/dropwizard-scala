@@ -28,8 +28,7 @@ case class Dependencies(scalaBinaryVersion: String) {
   private val versions = Versions(scalaBinaryVersion)
 
   val compile = scalaBinaryVersion match {
-    // note: scala-logging is only available for Scala 2.10+
-    case "2.10" | "2.11" => Seq("com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2")
+    case "2.10" | "2.11" => Seq("org.log4s" %% "log4s" % "1.3.0")
     case _ => Seq.empty
   }
 
