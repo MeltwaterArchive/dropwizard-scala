@@ -3,30 +3,32 @@ package com.datasift.dropwizard.scala.jersey.inject
 import java.io.OutputStream
 import java.lang.annotation.Annotation
 import java.lang.reflect.Type
-import javax.ws.rs.NotFoundException
+import javax.ws.rs.WebApplicationException
 import javax.ws.rs.core.{MultivaluedMap, MediaType}
 
 import com.datasift.dropwizard.scala.jersey.ParameterizedMessageBodyWriter
 
-class OptionMessageBodyWriter
-  extends ParameterizedMessageBodyWriter[Option[_]] {
+import scala.util.{Success, Failure, Try}
 
-  override def writeTo(option: Option[_],
-                       rawType: Class[_],
+class TryMessageBodyWriter extends ParameterizedMessageBodyWriter[Try[_]] {
+
+  override def writeTo(value: Try[_],
+                       rawClass: Class[_],
                        genericType: Type,
                        annotations: Array[Annotation],
                        mediaType: MediaType,
                        httpHeaders: MultivaluedMap[String, AnyRef],
-                       entityStream: OutputStream): Unit = option match {
-    case None => throw new NotFoundException
-    case Some(data) =>
+                       entityStream: OutputStream): Unit = value match {
+    case Failure(t) if t.isInstanceOf[WebApplicationException] => throw t
+    case Failure(t) => throw new WebApplicationException(t)
+    case Success(data) =>
       val klass = data.getClass
-      getTypeArgument(genericType, 0).foreach { tpe =>
-        getWriter(klass, tpe, annotations, mediaType).foreach {
+      getTypeArgument(genericType, 0).foreach { innerGenericType =>
+        getWriter(klass, innerGenericType, annotations, mediaType).foreach {
           _.writeTo(
-            data.asInstanceOf[Any],
+            data,
             klass,
-            tpe,
+            innerGenericType,
             annotations,
             mediaType,
             httpHeaders,

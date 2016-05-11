@@ -69,11 +69,16 @@ case class ScalaTestConfiguration(
   def bigint(@QueryParam("int") int: BigInt): Int = int.intValue
 
   @GET @Path("/either")
-  def either(@QueryParam("name") name: Either[String, Integer]): String = {
+  def either(@QueryParam("name") name: Either[String, Integer]): Either[Throwable, String] = {
     name match {
-      case Left(v) => greeting.format(v)
-      case Right(v) => v.toString
+      case Left(v) => Right(greeting.format(v))
+      case Right(v) => Left(new Exception("Int"))
     }
+  }
+
+  @GET @Path("/try")
+  def tryA(@QueryParam("name") name: Option[String]): Try[String] = Try {
+    greeting.format(name.get)
   }
 
   private def greetNames(names: Iterable[String]): List[String] =
@@ -348,7 +353,7 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[String])
     }
-    assert(result === Success(expected))
+    assert(result.isFailure)
   }
 
   "GET /either" should "yield left side" in {
@@ -375,5 +380,29 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
         .get(classOf[Int])
     }
     assert(result === Success(expected))
+  }
+
+  "GET /try" should "yield the result on success" in {
+    val fixture = "Nick"
+    val expected = Success("Hello, Nick")
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/try"))
+        .queryParam("name", fixture)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[String])
+    }
+    assert(result === expected)
+  }
+
+  "GET /try" should "yield an error, on error" in {
+    val result = app.request { (client, server) =>
+      client
+        .target(server.getURI.resolve("/try"))
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[String])
+    }
+    assert(result.isFailure)
+    assert(result.failed.get.isInstanceOf[InternalServerErrorException])
   }
 }

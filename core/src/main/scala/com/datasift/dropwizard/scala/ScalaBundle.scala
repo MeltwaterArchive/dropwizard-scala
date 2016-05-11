@@ -1,6 +1,6 @@
 package com.datasift.dropwizard.scala
 
-import com.datasift.dropwizard.scala.jersey.inject.{ScalaInjectionBinder, OptionMessageBodyWriter}
+import com.datasift.dropwizard.scala.jersey.inject.{EitherMessageBodyWriter, TryMessageBodyWriter, ScalaInjectionBinder, OptionMessageBodyWriter}
 import io.dropwizard.setup.{Bootstrap, Environment}
 import io.dropwizard.Bundle
 
@@ -20,6 +20,8 @@ class ScalaBundle extends Bundle {
   override def run(environment: Environment) {
     val jersey = environment.jersey()
     jersey.register(new OptionMessageBodyWriter)
+    jersey.register(new TryMessageBodyWriter)
+    jersey.register(new EitherMessageBodyWriter)
     jersey.register(new ScalaInjectionBinder)
     validatorsBundle.run(environment)
   }
