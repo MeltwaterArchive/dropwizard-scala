@@ -3,4 +3,3 @@ libraryDependencies ++= Seq(
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % Versions.jackson,
     "io.dropwizard" % "dropwizard-client" % Versions.dropwizard % "test"
 )
-

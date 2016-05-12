@@ -115,11 +115,12 @@ object DropwizardScala extends Build {
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   }
 
-  lazy val core = module("core").dependsOn(jersey, validation)
+  lazy val core = module("core").dependsOn(jersey, validation, test % "test")
   lazy val jersey = module("jersey")
   lazy val validation = module("validation")
   lazy val jdbi = module("jdbi")
   lazy val metrics = module("metrics")
+  lazy val test = module("test")
 
   lazy val parent = module("parent", file("."), Seq(
       publishArtifact := false,
