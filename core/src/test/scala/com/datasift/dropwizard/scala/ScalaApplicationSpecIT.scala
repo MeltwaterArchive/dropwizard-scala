@@ -2,20 +2,15 @@ package com.datasift.dropwizard.scala
 
 import javax.ws.rs.client.Client
 
+import com.datasift.dropwizard.scala.test.{ApplicationTest, BeforeAndAfterAllMulti}
 import io.dropwizard.util.Duration
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.scalatest.FlatSpec
 
 import com.datasift.dropwizard.scala.validation.constraints._
-import io.dropwizard.setup.{Environment, Bootstrap}
-import io.dropwizard.lifecycle.ServerLifecycleListener
-import io.dropwizard.cli.ServerCommand
-import io.dropwizard.client.JerseyClientBuilder
-import io.dropwizard.{Configuration, Application}
+import io.dropwizard.setup.Environment
+import io.dropwizard.Configuration
 
 import com.google.common.io.Resources
-import com.google.common.collect.ImmutableMap
-import net.sourceforge.argparse4j.inf.Namespace
-import org.eclipse.jetty.server.Server
 
 import javax.ws.rs._
 import javax.ws.rs.core.MediaType
@@ -92,133 +87,50 @@ class ScalaTestApp extends ScalaApplication[ScalaTestConfiguration] {
   }
 }
 
-object ApplicationHarness {
+class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
 
-  def retry[A](attempts: Int)
-              (f: => A): Try[A] = retry(attempts, 0)(_ => f)
+  val fixture = "Homer" :: "Bart" :: "Lisa" :: Nil
 
-  @annotation.tailrec
-  private def retry[A](attempts: Int, attempt: Int)
-                      (f: (Int) => A): Try[A] = Try(f(attempt)) match {
-    case success: Success[A] => success
-    case _ if attempts > 1 => retry(attempts - 1, attempt + 1)(f)
-    case failure => failure
-  }
-
-  def retryWithDelay[A](attempts: Int, delay: Duration)
-                       (f: => A): Try[A] = retry(attempts, 0) { attempt =>
-    if (attempt > 1) {
-      Thread.sleep(delay.toMilliseconds)
-    }
-    f
-  }
-
-  def retryWithDelay[A](attempts: Int, initialDelay: Duration, maxDelay: Duration)
-                       (f: => A): Try[A] = retry(attempts, 0) { attempt =>
-    if (attempt > 1) {
-      Thread.sleep(math.min(math.pow(initialDelay.toMilliseconds, attempt).toLong, maxDelay.toMilliseconds))
-    }
-    f
-  }
-}
-
-case class ApplicationHarness[C <: Configuration](app: Application[C], configPath: String) {
-
-  import ApplicationHarness._
-
-  private lazy val application = {
-    var jettyServer: Server = null
-    var environment: Environment = null
-    var configuration: Configuration = null
-    val bootstrap = new Bootstrap(app) {
-      override def run(conf: C, env: Environment) {
-        super.run(conf, env)
-        environment = env
-        configuration = conf
-        env.lifecycle().addServerLifecycleListener(new ServerLifecycleListener {
-          def serverStarted(server: Server) {
-            jettyServer = server
-          }
-        })
+  val app =
+    ApplicationTest[ScalaTestConfiguration, ScalaTestApp](
+      this, Resources.getResource("test-conf.yml").getPath) {
+        new ScalaTestApp
       }
-    }
-    app.initialize(bootstrap)
-    val command = new ServerCommand[C](app)
-    val namespace = new Namespace(ImmutableMap.of("file", configPath))
-    command.run(bootstrap, namespace)
-    retryWithDelay(5, Duration.seconds(1)) {
-      jettyServer match {
-        case null => throw new RuntimeException("Jetty Server failed to start.")
-        case x if !x.isRunning => throw new RuntimeException("Jetty Server started but is not running.")
-        case x => (x, environment, configuration.asInstanceOf[C])
-      }
-    }
-  }
 
-  lazy val client: Try[Client] = environment.map(new JerseyClientBuilder(_).build("client"))
+  lazy val client = app.newClient("test")
 
-  def server = application.map(_._1)
-
-  def environment = application.map(_._2)
-
-  def configuration = application.map(_._3)
-
-  def request[T](f: Client => T): Try[T] = client.map(f)
-
-  def request[T](f: (Client, Server) => T): Try[T] = for {
+  def request() = for {
     client <- client
-    server <- server
-  } yield f(client, server)
+    server <- app.server
+  } yield { client.target(server.getURI) }
 
-  def shutdown() {
-    server.map(_.stop())
-  }
-}
-
-class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
-
-  val fixture = Array("Nick", "Chris", "Fiona")
-
-  val app = ApplicationHarness(new ScalaTestApp, Resources.getResource("test-conf.yml").getPath)
-
-  override def beforeAll() { app.server; app.client }
-
-  override def afterAll() { app.shutdown() }
+  def request(target: String) = for {
+    client <- client
+    server <- app.server
+  } yield { client.target(server.getURI.resolve(target)) }
 
   "GET /" should "greet with configured names" in {
-    val expected = app.configuration.map(conf => conf.names.map(conf.greeting.getOrElse("%s").format(_)))
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI)
-        .request()
-        .get(classOf[Array[String]])
-        .toList
-    }
+    val expected = app.configuration
+      .map(conf => conf.names.map(conf.greeting.getOrElse("%s").format(_)))
+    val result = request().map(_.request().get(classOf[List[String]]))
     assert(result === expected)
   }
 
   "GET /list" should "not greet anyone when no names supplied" in {
     val expected = Success(List.empty[String])
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/list"))
-        .queryParam("names")
+    val result = request("/list").map {
+      _.queryParam("names")
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[List[String]])
-    }
-    result.recover {
-      case t => throw new RuntimeException(t)
     }
     assert(result === expected)
   }
 
-  "GET /list" should "greet with supplied names" in {
-    val fixture = "Michael" :: "Andrew" :: "Lisa" :: Nil
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)))
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/list"))
-        .queryParam("names", fixture: _*)
+  it should "greet with supplied names" in {
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)))
+    val result = request("/list").map {
+      _.queryParam("names", fixture: _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[List[String]])
     }
@@ -226,12 +138,10 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /seq" should "greet with supplied names" in {
-    val fixture = List("Michael", "Andrew", "Lisa")
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSeq)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/seq"))
-        .queryParam("names", fixture: _*)
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSeq)
+    val result = request("/seq").map {
+      _.queryParam("names", fixture: _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Seq[String]])
     }
@@ -239,12 +149,10 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /vector" should "greet with supplied names" in {
-    val fixture = List("Michael", "Andrew", "Lisa")
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toVector)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/vector"))
-        .queryParam("names", fixture: _*)
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toVector)
+    val result = request("/vector").map {
+      _.queryParam("names", fixture: _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Vector[String]])
     }
@@ -252,12 +160,10 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /set" should "greet with supplied names" in {
-    val fixture = List("Michael", "Andrew", "Lisa", "Lisa")
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSet)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/set"))
-        .queryParam("names", fixture: _*)
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toSet)
+    val result = request("/set").map {
+      _.queryParam("names", (fixture ++ fixture): _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Set[String]])
     }
@@ -265,25 +171,20 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /option" should "greet with supplied name" in {
-    val fixture = Option("Nick")
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/option"))
-        .queryParam("name", fixture.orNull)
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).headOption.toIterable)
+    val result = request("/option").map {
+      _.queryParam("name", fixture.head)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Iterable[String]])
     }
     assert(result === expected)
   }
 
-  "GET /option with no name" should "not greet" in {
-    val fixture: Option[String] = None
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/option"))
-        .queryParam("name", fixture.orNull)
+  it should "not greet when no name supplied" in {
+    val expected = Success(Iterable.empty[String])
+    val result = request("/option").map {
+      _.queryParam("name", null)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Iterable[String]])
     }
@@ -291,25 +192,19 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /maybe" should "greet with supplied name" in {
-    val fixture = Option("Nick")
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/maybe"))
-        .queryParam("name", fixture.orNull)
+    val expected = app.configuration
+      .map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).headOption.toIterable)
+    val result = request("/maybe").map {
+      _.queryParam("name", fixture.head)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Iterable[String]])
     }
     assert(result === expected)
   }
 
-  "GET /maybe with no name" should "present Not Found error" in {
-    val fixture: Option[String] = None
-    val expected = app.configuration.map(conf => fixture.map(conf.greeting.getOrElse("%s").format(_)).toIterable)
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/maybe"))
-        .queryParam("name", fixture.orNull)
+  it should "present Not Found error when no name supplied" in {
+    val result = request("/maybe").map {
+      _.queryParam("name", null)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Iterable[String]])
     }
@@ -318,12 +213,11 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   }
 
   "GET /complex" should "yield results" in {
-    val fixture: Set[java.math.BigDecimal] = Set(new java.math.BigDecimal(1), new java.math.BigDecimal(2))
+    val fixture: Set[java.math.BigDecimal] =
+      Set(new java.math.BigDecimal(1), new java.math.BigDecimal(2))
     val expected = 2
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/complex"))
-        .queryParam("names", fixture.toSeq: _*)
+    val result = request("/complex").map {
+      _.queryParam("names", fixture.toSeq: _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Int])
     }
@@ -333,36 +227,28 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
   "GET /complex_scala" should "yield results" in {
     val fixture: Set[BigDecimal] = Set(BigDecimal(1), BigDecimal(2))
     val expected = 2
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/complex_scala"))
-        .queryParam("names", fixture.toSeq: _*)
+    val result = request("/complex_scala").map {
+      _.queryParam("names", fixture.toSeq: _*)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Int])
     }
     assert(result === Success(expected))
   }
 
-  "GET /either" should "yield right side" in {
-    val fixture = 2
-    val expected = "2"
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/either"))
-        .queryParam("name", fixture.toString)
+  "GET /either" should "produce failure" in {
+    val result = request("/either").map {
+      _.queryParam("name", 2.toString)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[String])
     }
     assert(result.isFailure)
   }
 
-  "GET /either" should "yield left side" in {
-    val fixture = "Nick"
-    val expected = app.configuration.map(_.greeting.getOrElse("%s").format(fixture))
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/either"))
-        .queryParam("name", fixture)
+  it should "yield result" in {
+    val expected = app.configuration
+      .map(_.greeting.getOrElse("%s").format(fixture.head))
+    val result = request("/either").map {
+      _.queryParam("name", fixture.head)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[String])
     }
@@ -371,35 +257,29 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAll {
 
   "GET /bigint" should "yield the number" in {
     val fixture = BigInt(500)
-    val expected = 500
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/bigint"))
-        .queryParam("int", fixture.toString)
+    val expected = Success(500)
+    val result = request("/bigint").map {
+      _.queryParam("int", fixture.toString)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Int])
     }
-    assert(result === Success(expected))
+    assert(result === expected)
   }
 
   "GET /try" should "yield the result on success" in {
-    val fixture = "Nick"
-    val expected = Success("Hello, Nick")
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/try"))
-        .queryParam("name", fixture)
+    val expected = app.configuration
+      .map(_.greeting.getOrElse("%s").format(fixture.head))
+    val result = request("/try").map {
+      _.queryParam("name", fixture.head)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[String])
     }
     assert(result === expected)
   }
 
-  "GET /try" should "yield an error, on error" in {
-    val result = app.request { (client, server) =>
-      client
-        .target(server.getURI.resolve("/try"))
-        .request(MediaType.APPLICATION_JSON)
+  it should "yield an error, on error" in {
+    val result = request("/try").map {
+      _.request(MediaType.APPLICATION_JSON)
         .get(classOf[String])
     }
     assert(result.isFailure)
