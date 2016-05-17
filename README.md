@@ -131,8 +131,19 @@ Jersey
 JDBI
 ----
 
-  * JDBI marshalling of Scala collections, `Option` and case classes, 
-    in both method parameters and result types.
+  * JDBI marshalling of Scala collections, `Option`, `BigDecimal`, tuples and
+    case classes, in both method parameters and result types.
+
+    Note: when returning a case class or tuple, the following constraints
+    apply:
+
+      * selected columns must match up with constructor paramaters
+        _positionally_.
+      * only the first defined public constructor will be used if multiple
+        constructors are defined.
+      * paramater types must be directly mappable from their SQL types,
+        without the use of a mapper. The only exceptions to this rule are
+        `Option` and `scala.BigDecimal`, which are natively supported.
 
   * A more idiomatic JDBI API:
 

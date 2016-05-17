@@ -6,7 +6,8 @@ import org.skife.jdbi.v2.tweak.ContainerFactory
 /** A [[org.skife.jdbi.v2.tweak.ContainerFactory]] for Scala Options. */
 class OptionContainerFactory extends ContainerFactory[Option[Any]] {
 
-  def accepts(clazz: Class[_]): Boolean = classOf[Option[_]].isAssignableFrom(clazz)
+  def accepts(clazz: Class[_]): Boolean =
+    classOf[Option[_]].isAssignableFrom(clazz)
 
   def newContainerBuilderFor(clazz: Class[_]): ContainerBuilder[Option[Any]] = {
     new ContainerBuilder[Option[Any]] {
