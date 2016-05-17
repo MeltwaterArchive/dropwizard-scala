@@ -9,12 +9,17 @@ import scala.util.{Failure, Try}
 
 object LiquibaseTest {
 
+  def apply(suite: BeforeAndAfterAllMulti,
+            config: Config = Config())
+           (newDataSource: => ManagedDataSource): LiquibaseTest =
+    new LiquibaseTest(suite, config)(newDataSource)
+
   case class Config(file: String = "migrations.xml",
                     contexts: Seq[String] = Seq.empty)
 }
 
 class LiquibaseTest(suite: BeforeAndAfterAllMulti,
-                    config: LiquibaseTest.Config)
+                    config: LiquibaseTest.Config = LiquibaseTest.Config())
                    (newDataSource: => ManagedDataSource) {
 
   private var _dataSource: Try[ManagedDataSource] =
