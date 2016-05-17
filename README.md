@@ -131,11 +131,23 @@ Jersey
 JDBI
 ----
 
-  * JDBI marshalling of Scala collections, `Option`, `BigDecimal`, tuples and
-    case classes, in both method parameters and result types.
+  * Scala collections and `Option` as the return type for a result set (i.e. 
+    multiple rows of results).
 
-    Note: when returning a case class or tuple, the following constraints
-    apply:
+    Note: when returning a single row as an `Option`, you must use the
+    `@SingleValueResult` annotation:
+
+    ```scala
+    @SqlQuery("select i from tbl limit 1")
+    @SingleValueResult
+    def headOption: Option[Int]
+    ```
+
+  * Support for the `BigDecimal` and `Option` types as parameters and result 
+    column types.
+
+  * Support for returning a row as a case class or tuple, with the following
+    constraints:
 
       * selected columns must match up with constructor paramaters
         _positionally_.
@@ -145,17 +157,27 @@ JDBI
         without the use of a mapper. The only exceptions to this rule are
         `Option` and `scala.BigDecimal`, which are natively supported.
 
+  * case classes and tuples as parameters using the `BindProduct` annotation:
+    
+    ```scala
+    @SqlUpdate("insert into tbl (a, b, c, d) values (:x.a, :x.b, :y._1, :y._2)")
+    def insert(@BindProduct("x") x: Thing, @BindProduct("y") y: (Int, String))
+    ```
+
+    Note: `BindProduct` will bind to any no-args method or field (prioritizing
+    no-arg methods).
+
   * A more idiomatic JDBI API:
 
-  ```scala
-  import com.datasift.dropwizard.scala.jdbi._
-  
-  val db = JDBI(dataSource)
-  val dao = db.onDemand[MyDAO]
-  val result: Int = db.inTransaction {
-    handle: Handle => handle.attach[MyDAO].myQuery(123)
-  }
-  ```
+    ```scala
+    import com.datasift.dropwizard.scala.jdbi._
+    
+    val db = JDBI(dataSource)
+    val dao = db.onDemand[MyDAO]
+    val result: Int = db.inTransaction {
+      handle: Handle => handle.attach[MyDAO].myQuery(123)
+    }
+    ```
 
 To enable Scala integration for JDBI, you will need to add an extra dependency:
 

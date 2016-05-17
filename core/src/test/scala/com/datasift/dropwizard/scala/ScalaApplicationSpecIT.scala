@@ -4,6 +4,7 @@ import java.io.File
 import javax.ws.rs.client.Entity
 
 import com.codahale.metrics.MetricRegistry
+import com.datasift.dropwizard.jdbi.tweak.BindProduct
 import com.datasift.dropwizard.scala.jdbi.JDBI
 import com.datasift.dropwizard.scala.test.{LiquibaseTest, MySQLTest, ApplicationTest, BeforeAndAfterAllMulti}
 import io.dropwizard.db.DataSourceFactory
@@ -97,6 +98,11 @@ case class ScalaTestConfiguration(
     db.insert(row)
   }
 
+  @POST @Path("/db/rowT")
+  def insertRow(row: (BigDecimal, Option[String])): Int = {
+    db.insertT(row)
+  }
+
   @GET @Path("/db/row")
   def getRow: Option[Row] = {
     db.get()
@@ -123,7 +129,10 @@ trait TestDAO {
              @Bind("o") y: Option[String]): Int
 
   @SqlUpdate("INSERT INTO tbl (d, o) VALUES (:row.d, :row.o)")
-  def insert(@BindBean("row") row: Row): Int
+  def insert(@BindProduct("row") row: Row): Int
+
+  @SqlUpdate("INSERT INTO tbl (d, o) VALUES (:row._1, :row._2)")
+  def insertT(@BindProduct("row") row: (BigDecimal, Option[String])): Int
 
   @SingleValueResult
   @SqlQuery("SELECT d, o FROM tbl")
@@ -133,8 +142,7 @@ trait TestDAO {
   def debug(): String
 }
 
-case class Row(@BeanProperty d: BigDecimal,
-               @BeanProperty o: Option[String])
+case class Row(d: BigDecimal, o: Option[String])
 
 class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
 
@@ -363,6 +371,15 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
     val result = request("/db/row").map {
       _.request(MediaType.APPLICATION_JSON)
         .post(Entity.json(Row(BigDecimal(12345.678), Option("Nick"))), classOf[Int])
+    }
+
+    assert(result === Success(1))
+  }
+
+  "POST /db/rowT" should "write whole row" in {
+    val result = request("/db/rowT").map {
+      _.request(MediaType.APPLICATION_JSON)
+        .post(Entity.json((BigDecimal(12345.678), Option("Nick"))), classOf[Int])
     }
 
     assert(result === Success(1))

@@ -39,7 +39,6 @@ object JDBI {
     dbi.registerContainerFactory(new IterableContainerFactory[scala.collection.Seq])
     dbi.registerContainerFactory(new IterableContainerFactory[scala.collection.Set])
     dbi.registerMapper(new ProductResultSetMapperFactory)
-
     dbi
   }
 }
