@@ -3,3 +3,9 @@ names:
   - Nick
   - Chris
   - Fiona
+
+db:
+  driverClass: com.mysql.jdbc.Driver
+  user: root
+  password: ""
+  url: jdbc:mysql:mxj://localhost:3309/test?server.basedir=./target/mysql&createDatabaseIfNotExist=true&server.initialize-user=true

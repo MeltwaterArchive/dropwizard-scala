@@ -1,9 +1,13 @@
 package com.datasift.dropwizard.scala
 
-import javax.ws.rs.client.Client
+import java.io.File
+import javax.ws.rs.client.Entity
 
-import com.datasift.dropwizard.scala.test.{ApplicationTest, BeforeAndAfterAllMulti}
-import io.dropwizard.util.Duration
+import com.codahale.metrics.MetricRegistry
+import com.datasift.dropwizard.scala.jdbi.JDBI
+import com.datasift.dropwizard.scala.test.{LiquibaseTest, MySQLTest, ApplicationTest, BeforeAndAfterAllMulti}
+import io.dropwizard.db.DataSourceFactory
+import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap
 import org.scalatest.FlatSpec
 
 import com.datasift.dropwizard.scala.validation.constraints._
@@ -13,18 +17,24 @@ import io.dropwizard.Configuration
 import com.google.common.io.Resources
 
 import javax.ws.rs._
-import javax.ws.rs.core.MediaType
+import javax.ws.rs.core.{Form, MediaType}
 
+import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult
+import org.skife.jdbi.v2.sqlobject.helpers.MapResultAsBean
+import org.skife.jdbi.v2.sqlobject.{BindBean, SqlQuery, SqlUpdate, Bind}
+
+import scala.beans.BeanProperty
 import scala.util.{Try, Success}
 
 case class ScalaTestConfiguration(
   @NotEmpty greeting: Option[String] = None,
-  @NotEmpty @Size(max = 5) names: List[String] = Nil
+  @NotEmpty @Size(max = 5) names: List[String] = Nil,
+  @NotNull @Valid db: DataSourceFactory
 ) extends Configuration
 
 @Consumes(Array(MediaType.APPLICATION_JSON))
 @Produces(Array(MediaType.APPLICATION_JSON))
-@Path("/") class ScalaTestResource(greeting: String, names: List[String]) {
+@Path("/") class ScalaTestResource(db: TestDAO, greeting: String, names: List[String]) {
 
   @GET def greet = greetWithList(names)
 
@@ -76,24 +86,75 @@ case class ScalaTestConfiguration(
     greeting.format(name.get)
   }
 
+  @POST @Path("/db/separate") @Consumes(Array(MediaType.APPLICATION_FORM_URLENCODED))
+  def insertSeparate(@FormParam("decimal") decimal: BigDecimal,
+                     @FormParam("option") option: Option[String]): Int = {
+    db.insert(decimal, option)
+  }
+
+  @POST @Path("/db/row")
+  def insertRow(row: Row): Int = {
+    db.insert(row)
+  }
+
+  @GET @Path("/db/row")
+  def getRow: Option[Row] = {
+    db.get()
+  }
+
   private def greetNames(names: Iterable[String]): List[String] =
     names.map(greeting.format(_)).toList
 
 }
 
 class ScalaTestApp extends ScalaApplication[ScalaTestConfiguration] {
+  import jdbi._
   def run(configuration: ScalaTestConfiguration, environment: Environment) {
-    environment.jersey().register(new ScalaTestResource(configuration.greeting.get, configuration.names))
+    val dao = JDBI(environment, configuration.db, "test").daoFor[TestDAO]
+    environment.jersey
+      .register(new ScalaTestResource(dao, configuration.greeting.get, configuration.names))
   }
 }
+
+trait TestDAO {
+
+  @SqlUpdate("INSERT INTO tbl (d, o) VALUES (:d, :o)")
+  def insert(@Bind("d") x: BigDecimal,
+             @Bind("o") y: Option[String]): Int
+
+  @SqlUpdate("INSERT INTO tbl (d, o) VALUES (:row.d, :row.o)")
+  def insert(@BindBean("row") row: Row): Int
+
+  @SingleValueResult
+  @SqlQuery("SELECT d, o FROM tbl")
+  def get(): Option[Row]
+
+  @SqlQuery("select d from tbl")
+  def debug(): String
+}
+
+case class Row(@BeanProperty d: BigDecimal,
+               @BeanProperty o: Option[String])
 
 class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
 
   val fixture = "Homer" :: "Bart" :: "Lisa" :: Nil
+  val dsFactory = new DataSourceFactory()
+  dsFactory.setUrl("jdbc:mysql:mxj://localhost:3309/test?server.basedir=./target/mysql&createDatabaseIfNotExist=true&server.initialize-user=true")
+  dsFactory.setDriverClass("com.mysql.jdbc.Driver")
+  dsFactory.setUser("root")
+
+  val db = MySQLTest(this, dsFactory.getUrl) {
+    dsFactory.build(new MetricRegistry, "test")
+  }
+
+  val liquibase = LiquibaseTest(this, LiquibaseTest.Config(file = new File(Resources.getResource("migrations.xml").toURI).getAbsolutePath)) {
+    dsFactory.build(new MetricRegistry, "migrations")
+  }
 
   val app =
     ApplicationTest[ScalaTestConfiguration, ScalaTestApp](
-      this, Resources.getResource("test-conf.yml").getPath) {
+      this, new File(Resources.getResource("test-conf.yml").toURI).getAbsolutePath) {
         new ScalaTestApp
       }
 
@@ -284,5 +345,34 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
     }
     assert(result.isFailure)
     assert(result.failed.get.isInstanceOf[InternalServerErrorException])
+  }
+
+  "POST /db/separate" should "write data" in {
+    val form = new Form()
+      .param("decimal", BigDecimal(12345.678).toString)
+      .param("option", "Nick")
+    val result = request("/db/separate").map {
+      _.request(MediaType.APPLICATION_FORM_URLENCODED)
+        .accept(MediaType.APPLICATION_JSON)
+        .post(Entity.form(form), classOf[Int])
+    }
+    assert(result === Success(1))
+  }
+
+  "POST /db/row" should "write whole row" in {
+    val result = request("/db/row").map {
+      _.request(MediaType.APPLICATION_JSON)
+        .post(Entity.json(Row(BigDecimal(12345.678), Option("Nick"))), classOf[Int])
+    }
+
+    assert(result === Success(1))
+  }
+
+  "GET /db/row" should "get whole row" in {
+    val result = request("/db/row").map {
+      _.request().get(classOf[Row])
+    }
+
+    assert(result === Success(Row(BigDecimal(12345.678), Option("Nick"))))
   }
 }
