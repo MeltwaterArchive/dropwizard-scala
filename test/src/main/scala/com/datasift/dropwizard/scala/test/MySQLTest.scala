@@ -28,7 +28,7 @@ class MySQLTest(suite: BeforeAndAfterAllMulti, connectionURI: => String)
   var _baseDir: Try[File] = Failure(NotInitializedException)
 
   def dataSource: Try[ManagedDataSource] = _dataSource
-  def baseDir: Try[File] = baseDir
+  def baseDir: Try[File] = _baseDir
 
   suite.beforeAll {
     _dataSource = Try(newDataSource)
