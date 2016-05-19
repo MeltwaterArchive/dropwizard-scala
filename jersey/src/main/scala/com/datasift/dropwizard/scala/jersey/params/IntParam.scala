@@ -18,8 +18,4 @@ object IntParam {
 case class IntParam(s: String) extends AbstractParam[Int](s) {
 
   protected def parse(input: String) = s.toInt
-
-  override protected def errorMessage(input: String, e: Exception) = {
-    "Invalid parameter: %s (Must be an integer value.)".format(input)
-  }
 }

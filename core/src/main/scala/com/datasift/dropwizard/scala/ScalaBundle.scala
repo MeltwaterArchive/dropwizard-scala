@@ -1,6 +1,8 @@
 package com.datasift.dropwizard.scala
 
 import com.datasift.dropwizard.scala.jersey.inject.{EitherMessageBodyWriter, TryMessageBodyWriter, ScalaInjectionBinder, OptionMessageBodyWriter}
+import com.fasterxml.jackson.databind.introspect.{JacksonAnnotationIntrospector, AnnotationIntrospectorPair}
+import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector
 import io.dropwizard.setup.{Bootstrap, Environment}
 import io.dropwizard.Bundle
 
@@ -13,7 +15,11 @@ class ScalaBundle extends Bundle {
   val validatorsBundle = new ScalaValidatorsBundle
 
   override def initialize(bootstrap: Bootstrap[_]) {
-    bootstrap.getObjectMapper.registerModule(new DefaultScalaModule)
+    val mapper = bootstrap.getObjectMapper
+    mapper.registerModule(new DefaultScalaModule)
+    mapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(
+      ScalaAnnotationIntrospector,
+      new JacksonAnnotationIntrospector))
     validatorsBundle.initialize(bootstrap)
   }
 

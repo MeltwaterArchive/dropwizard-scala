@@ -18,8 +18,4 @@ object BooleanParam {
 case class BooleanParam(s: String) extends AbstractParam[Boolean](s) {
 
   protected def parse(input: String) = input.toBoolean
-
-  override protected def errorMessage(input: String, e: Exception) = {
-    "Invalid parameter: %s (Must be \"true\" or \"false\".)".format(input)
-  }
 }

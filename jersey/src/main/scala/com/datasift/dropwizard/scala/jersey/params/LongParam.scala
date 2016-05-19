@@ -17,8 +17,4 @@ object LongParam {
   */
 case class LongParam(s: String) extends AbstractParam[Long](s) {
   protected def parse(input: String) = s.toLong
-
-  override protected def errorMessage(input: String, e: Exception) = {
-    "Invalid parameter: %s (Must be an integer value.)".format(input)
-  }
 }
