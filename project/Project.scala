@@ -109,5 +109,5 @@ object DropwizardScala extends Build {
       Keys.`package` := file(""),
       packageBin in Global := file(""),
       packagedArtifacts := Map()))
-    .aggregate(core, jersey, jdbi, validation, metrics)
+    .aggregate(core, jersey, jdbi, validation, metrics, test)
 }
