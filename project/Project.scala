@@ -7,32 +7,7 @@ object Versions {
   val dropwizard = "0.8.5"
   val jackson = "2.5.1"
   val mockito = "1.10.19"
-}
-
-case class Versions(scalaBinaryVersion: String) {
-
-  val dropwizard = Versions.dropwizard
-  val jackson = Versions.jackson
-
-  val mockito = Versions.mockito
-  val scalaTest = scalaBinaryVersion match {
-    case "2.10" | "2.11" => "2.2.6"
-  }
-}
-
-case class Dependencies(scalaBinaryVersion: String) {
-
-  private val versions = Versions(scalaBinaryVersion)
-
-  val compile = scalaBinaryVersion match {
-    case "2.10" | "2.11" => Seq("org.log4s" %% "log4s" % "1.3.0")
-    case _ => Seq.empty
-  }
-
-  val test = Seq(
-    "org.scalatest" %% "scalatest" % versions.scalaTest % "test",
-    "org.mockito" % "mockito-core" % versions.mockito % "test"
-  )
+  val scalaTest = "2.2.6"
 }
 
 object CompileOptions {
@@ -74,8 +49,11 @@ object DropwizardScala extends Build {
       "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
       "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
     ),
-    libraryDependencies <++= scalaBinaryVersion(Dependencies).apply(_.compile),
-    libraryDependencies <++= scalaBinaryVersion(Dependencies).apply(_.test),
+    libraryDependencies ++= Seq(
+      "org.log4s" %% "log4s" % "1.3.0",
+      "org.scalatest" %% "scalatest" % Versions.scalaTest % "test",
+      "org.mockito" % "mockito-core" % Versions.mockito % "test"
+    ),
     publishMavenStyle := true,
     publishTo <<= isSnapshot(repository),
     publishArtifact in Test := false,
@@ -92,7 +70,7 @@ object DropwizardScala extends Build {
     unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
       case (s, v) => s / ("scala_" + v) :: Nil
     },
-    releaseTagName <<= (normalizedName, version in ThisBuild) map { (n,v) => n + "-" + v }
+    releaseCrossBuild := true
   )
 
   def module(id: String): sbt.Project = module(id, file(id), Nil)
