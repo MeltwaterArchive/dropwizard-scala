@@ -96,7 +96,7 @@ object DropwizardScala extends Build {
       case (s, v) => s / ("scala_" + v) :: Nil
     },
     version := Versions.project,
-    releaseTagName <<= (name, version in ThisBuild) map { (n,v) => n + "-" + v }
+    releaseTagName <<= (normalizedName, version in ThisBuild) map { (n,v) => n + "-" + v }
   )
 
   def module(id: String): sbt.Project = module(id, file(id), Nil)
