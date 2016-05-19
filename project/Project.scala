@@ -6,10 +6,7 @@ object Versions {
 
   val dropwizard = "0.8.5"
   val jackson = "2.5.1"
-
   val mockito = "1.10.19"
-
-  val project  = Versions.dropwizard + "-1-SNAPSHOT"
 }
 
 case class Versions(scalaBinaryVersion: String) {
@@ -95,7 +92,6 @@ object DropwizardScala extends Build {
     unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
       case (s, v) => s / ("scala_" + v) :: Nil
     },
-    version := Versions.project,
     releaseTagName <<= (normalizedName, version in ThisBuild) map { (n,v) => n + "-" + v }
   )
 
