@@ -1,3 +1,4 @@
+import com.typesafe.sbt.pgp.PgpKeys
 import sbt._
 import Keys._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -71,7 +72,10 @@ object DropwizardScala extends Build {
     unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
       case (s, v) => s / ("scala_" + v) :: Nil
     },
+    PgpKeys.useGpg := true,
+    PgpKeys.useGpgAgent := true,
     releaseCrossBuild := true,
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     releaseVersion := identity[String],
     releaseNextVersion := { Version(_).map { v =>
       v.withoutQualifier.string + "-" + v.qualifier
