@@ -5,10 +5,8 @@ import javax.ws.rs.client.Entity
 
 import com.codahale.metrics.MetricRegistry
 import com.datasift.dropwizard.jdbi.tweak.BindProduct
-import com.datasift.dropwizard.scala.jdbi.JDBI
 import com.datasift.dropwizard.scala.test.{LiquibaseTest, MySQLTest, ApplicationTest, BeforeAndAfterAllMulti}
 import io.dropwizard.db.DataSourceFactory
-import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap
 import org.scalatest.FlatSpec
 
 import com.datasift.dropwizard.scala.validation.constraints._
@@ -21,10 +19,8 @@ import javax.ws.rs._
 import javax.ws.rs.core.{Form, MediaType}
 
 import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult
-import org.skife.jdbi.v2.sqlobject.helpers.MapResultAsBean
-import org.skife.jdbi.v2.sqlobject.{BindBean, SqlQuery, SqlUpdate, Bind}
+import org.skife.jdbi.v2.sqlobject.{SqlQuery, SqlUpdate, Bind}
 
-import scala.beans.BeanProperty
 import scala.util.{Try, Success}
 
 case class ScalaTestConfiguration(

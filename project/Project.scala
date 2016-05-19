@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease._
 
 object Versions {
 
@@ -19,7 +20,7 @@ object CompileOptions {
       "-language:higherKinds" ::
       "-feature" ::
       (scalaVersion match {
-        case v if v.startsWith("2.11.") && v.stripSuffix("2.11.").toInt > 4 =>
+        case v if v.startsWith("2.11.") && v.stripPrefix("2.11.").toInt > 4 =>
           "-target:jvm-1.8"
         case _ =>
           "-target:jvm-1.7"
@@ -70,7 +71,13 @@ object DropwizardScala extends Build {
     unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
       case (s, v) => s / ("scala_" + v) :: Nil
     },
-    releaseCrossBuild := true
+    releaseCrossBuild := true,
+    releaseVersion := identity[String],
+    releaseNextVersion := { Version(_).map { v =>
+      v.withoutQualifier.string + "-" + v.qualifier
+        .flatMap(x => util.Try(x.stripPrefix("-").toInt).toOption)
+        .map(_ + 1).getOrElse(1)
+    }.getOrElse(versionFormatError) }
   )
 
   def module(id: String): sbt.Project = module(id, file(id), Nil)
