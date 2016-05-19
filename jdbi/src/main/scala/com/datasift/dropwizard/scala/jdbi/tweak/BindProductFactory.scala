@@ -1,13 +1,11 @@
 package com.datasift.dropwizard.scala.jdbi.tweak
 
-import java.lang.annotation.Annotation
-
 import com.datasift.dropwizard.jdbi.tweak.BindProduct
 import org.skife.jdbi.v2.SQLStatement
 import org.skife.jdbi.v2.sqlobject.{Binder, BinderFactory}
 
-class BindProductFactory extends BinderFactory {
-  override def build(annotation: Annotation): Binder[_ <: Annotation, _] = {
+class BindProductFactory extends BinderFactory[BindProduct] {
+  override def build(annotation: BindProduct): Binder[BindProduct, Product] = {
     new Binder[BindProduct, Product] {
       override def bind(q: SQLStatement[_],
                         bind: BindProduct,

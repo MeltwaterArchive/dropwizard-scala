@@ -11,7 +11,7 @@ Just add a dependency to `dropwizard-scala-core` and `dropwizard-scala-jdbi` _(o
 ### SBT
 
 ```scala
-libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-core" % "0.9.2-1"
+libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-core" % "1.0.0-1"
 ```
 
 ### Maven
@@ -22,7 +22,7 @@ Include the `dropwizard-scala-core` artifact in your POM:
 <dependency>
     <groupId>com.datasift.dropwizard.scala</groupId>
     <artifactId>dropwizard-scala-core_2.10.2</artifactId>
-    <version>0.9.2-1</version>
+    <version>1.0.0-1</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ can use elsewhere to ensure coherence in your POM:
 ```xml
 <properties>
     <scala.version>2.10.2</scala.version>
-    <dropwizard.version>0.9.2-1</dropwizard.version>
+    <dropwizard.version>1.0.0-1</dropwizard.version>
     <dropwizard.scala.version>${dropwizard.version}-1</dropwizard.scala.version>
 </properties>
 
@@ -184,7 +184,7 @@ To enable Scala integration for JDBI, you will need to add an extra dependency:
 ### SBT
 
 ```scala
-libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-jdbi" % "0.9.2-1"
+libraryDependencies += "com.datasift.dropwizard.scala" %% "dropwizard-scala-jdbi" % "1.0.0-1"
 ```
 
 ### Maven
