@@ -239,7 +239,7 @@ Test
 ----
 
 This module provides some utilities for aiding testing with ScalaTest.
-Note: this module is by far the least mature, and the API of its components id
+Note: this module is by far the least mature, and the API of its components is
 subject to change. Comments, ideas and suggestions welcome.
 
 See `core/src/test/**/ScalaApplicationSpecIT` for examples of all of these 
@@ -259,7 +259,7 @@ components in action.
 
     ```scala
     val app =
-      ApplicationTest[MyConfiguration, MyApplication](this, configFilePath) {
+      ApplicationTest(this, configFilePath) {
         MyApplication
       }
     ```
