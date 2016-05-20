@@ -109,7 +109,7 @@ case class ScalaTestConfiguration(
 
 }
 
-class ScalaTestApp extends ScalaApplication[ScalaTestConfiguration] {
+object ScalaTestApp extends ScalaApplication[ScalaTestConfiguration] {
   import jdbi._
   def run(configuration: ScalaTestConfiguration, environment: Environment) {
     val dao = JDBI(environment, configuration.db, "test").daoFor[TestDAO]
@@ -157,9 +157,9 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
   }
 
   val app =
-    ApplicationTest[ScalaTestConfiguration, ScalaTestApp](
+    ApplicationTest(
       this, new File(Resources.getResource("test-conf.yml").toURI).getAbsolutePath) {
-        new ScalaTestApp
+        ScalaTestApp
       }
 
   lazy val client = app.newClient("test")

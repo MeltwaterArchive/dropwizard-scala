@@ -15,28 +15,28 @@ import scala.collection.JavaConverters._
 
 object ApplicationTest {
 
-  def apply[C <: Configuration, A <: Application[C]]
+  def apply[C <: Configuration]
            (suite: BeforeAndAfterAllMulti,
             configPath: String,
             args: Map[String, AnyRef] = Map.empty)
-           (newApp: => A): ApplicationTest[C, A] =
-    new ApplicationTest[C, A](suite, configPath, args)(newApp)
+           (newApp: => Application[C]): ApplicationTest[C] =
+    new ApplicationTest[C](suite, configPath, args)(newApp)
 
 }
 
-class ApplicationTest[C <: Configuration, A <: Application[C]]
+class ApplicationTest[C <: Configuration]
                      (suite: BeforeAndAfterAllMulti,
                       configPath: String,
                       args: Map[String, AnyRef] = Map.empty)
-                     (newApp: => A) {
+                     (newApp: => Application[C]) {
 
   private var _configuration: Try[C] = Failure(NotInitializedException)
-  private var _application: Try[A] = Failure(NotInitializedException)
+  private var _application: Try[Application[C]] = Failure(NotInitializedException)
   private var _environment: Try[Environment] = Failure(NotInitializedException)
   private var _server: Try[Server] = Failure(NotInitializedException)
 
   def configuration: Try[C] = _configuration
-  def application: Try[A] = _application
+  def application: Try[Application[C]] = _application
   def environment: Try[Environment] = _environment
   def server: Try[Server] = _server
 
