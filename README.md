@@ -87,7 +87,7 @@ Metrics
 
   * A more idiomatic API for metrics is provided by `com.datasift.dropwizard.scala.metrics._`.
   
-```
+```scala
 import com.codahale.metrics._
 import com.datasift.dropwizard.scala.metrics._
 
@@ -234,4 +234,78 @@ case class MyConfiguration(@Valid @NotEmpty people: List[Person])
 
 case class Person(@NotEmpty name: String, @Min(0) age: Int)
 ```
+
+Test
+----
+
+This module provides some utilities for aiding testing with ScalaTest.
+Note: this module is by far the least mature, and the API of its components id
+subject to change. Comments, ideas and suggestions welcome.
+
+See `core/src/test/**/ScalaApplicationSpecIT` for examples of all of these 
+components in action.
+
+  * `BeforeAndAfterMulti` - a utility trait that allows multiple functions to 
+    be registered to run `before` and `after` tests, executing the `after`
+    functions in the reverse order to their associated `before` functions.
+    This behaves similarly to Dropwizard's lifecycle management, except it's 
+    managing the lifecycle of test dependencies.
+
+    All of the `*Test` utilities below require that your test class extend this
+    trait.
+
+  * `ApplicationTest` - runs tests in the context of a running Dropwizard 
+    Application:
+
+    ```scala
+    val app =
+      ApplicationTest[MyConfiguration, MyApplication](this, configFilePath) {
+        MyApplication
+      }
+    ```
+
+    The returned object contains the following utility methods to work with the
+    application:
+
+    * `configuration: Try[C]` - the application's configuration.
+    * `application: Try[A]` - the application object itself.
+    * `environment: Try[Environment]` - the appliction's `Environment`.
+    * `server: Try[Server]` - the application's Jetty `Server`.
+    * `newClient(name: String): Try[Client]` - a helper to construct a Jersey
+      `Client` that connects to the application.
+
+  * `MySQLTest` - runs tests in the context of a running MySQL server:
+
+    ```scala
+    val mysql = MySQLTest(this, dataSourceFactory.getUrl) {
+      dataSourceFactory.build(new MetricRegistry, "test")
+    }
+    ```
+
+    The returned object contains the following utility methods to work with the
+    MySQL server:
+
+    * `dataSource: Try[ManagedDataSource]` - the `DataSource` used to create 
+      the database instance.
+    * `baseDir: Try[File]` - the base directory for the MySQL server's data.
+
+    Note: to use this object, you will need to add a dependency on
+    `mysql:mysql-connector-mxj:5.0.12`.
+
+  * `LiquibaseTest` - runs tests in the context of a database migration:
+
+    ```scala
+    val migrations = LiquibaseTest(
+      this, LiquibaseTest.Config(migrationsFilePath)) {
+        dataSourceFactory.build(new MetricRegistry, "migrations")
+      }
+    ```
+
+    The returned object contains the following utility methods to work with the
+    Liquibase context:
+
+    * `dataSource: Try[ManagedDataSource]` - the `DataSource` used to connect 
+      to the database instance.
+    * `liquibase: Try[CloseableLiquibase]` - the Liquibase context that ran the
+      migrations.
 
