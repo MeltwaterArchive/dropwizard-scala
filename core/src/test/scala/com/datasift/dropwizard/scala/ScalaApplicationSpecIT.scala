@@ -43,6 +43,14 @@ case class ScalaTestConfiguration(
   def greetWithOption(@QueryParam("name") name: Option[String]): List[String] =
     name.map(greeting.format(_)).toList
 
+  @GET @Path("/option_with_no_default")
+  def testOptionNoDefault(@QueryParam("name") name: Option[String] = None): Boolean =
+    name != null && name.isEmpty
+
+  @GET @Path("/option_with_default")
+  def testOptionWithDefault(@QueryParam("name") name: Option[String] = Some("Frank")): String =
+    name.get
+
   @GET @Path("/list")
   def greetWithList(@QueryParam("names") names: List[String]): List[String] =
     greetNames(names)
@@ -244,6 +252,23 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
         .get(classOf[Iterable[String]])
     }
     assert(result === expected)
+  }
+
+  "GET /option_with_no_default" should "use None" in {
+    val result = request("/option_with_no_default").map {
+        _.request(MediaType.APPLICATION_JSON)
+        .get(classOf[Boolean])
+    }
+    assert(result === Success(true))
+  }
+
+  "GET /option_with_default" should "use default" in {
+    val result = request("/option_with_default").map {
+      _.request(MediaType.APPLICATION_JSON)
+        .get(classOf[String])
+    }
+    println(result.failed.get.getMessage)
+    assert(result === Success("Frank"))
   }
 
   it should "not greet when no name supplied" in {
