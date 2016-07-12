@@ -101,7 +101,7 @@ object DropwizardScala extends Build {
   }
 
   lazy val core = module("core")
-    .dependsOn(jersey, validation, test % "test", jdbi % "test")
+    .dependsOn(jersey, validation, metrics, test % "test", jdbi % "test")
   lazy val jersey = module("jersey")
   lazy val validation = module("validation")
   lazy val jdbi = module("jdbi")
