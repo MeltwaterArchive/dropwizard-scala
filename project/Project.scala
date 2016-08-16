@@ -6,8 +6,8 @@ import sbtrelease._
 
 object Versions {
 
-  val dropwizard = "1.0.0-rc2"
-  val jackson = "2.7.3"
+  val dropwizard = "1.0.0"
+  val jackson = "2.7.5" // DW 1.0.0 uses jackson 2.7.6, but jackson-module-scala 2.7.5 is latest
   val mockito = "1.10.19"
   val scalaTest = "2.2.6"
 }

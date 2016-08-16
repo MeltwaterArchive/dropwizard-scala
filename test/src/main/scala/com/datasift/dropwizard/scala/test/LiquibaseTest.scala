@@ -3,7 +3,7 @@ package com.datasift.dropwizard.scala.test
 import java.util.Date
 
 import io.dropwizard.db.ManagedDataSource
-import io.dropwizard.migrations.CloseableLiquibase
+import io.dropwizard.migrations.{CloseableLiquibase, CloseableLiquibaseWithFileSystemMigrationsFile}
 
 import scala.util.{Failure, Try}
 
@@ -33,7 +33,7 @@ class LiquibaseTest(suite: BeforeAndAfterAllMulti,
   suite.beforeAll {
     _dataSource = Try(newDataSource)
     _liquibase = _dataSource
-      .flatMap(ds => Try(new CloseableLiquibase(ds, config.file)))
+      .flatMap(ds => Try(new CloseableLiquibaseWithFileSystemMigrationsFile(ds, config.file)))
 
     _liquibase.foreach(_.update(config.contexts.mkString(",")))
   }
