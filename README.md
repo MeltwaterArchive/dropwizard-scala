@@ -32,7 +32,7 @@ can use elsewhere to ensure coherence in your POM:
 ```xml
 <properties>
     <scala.version>2.10.2</scala.version>
-    <dropwizard.version>1.0.0-1</dropwizard.version>
+    <dropwizard.version>1.0.0</dropwizard.version>
     <dropwizard.scala.version>${dropwizard.version}-1</dropwizard.scala.version>
 </properties>
 
