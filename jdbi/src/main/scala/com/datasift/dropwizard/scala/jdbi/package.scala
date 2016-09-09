@@ -103,6 +103,17 @@ package object jdbi {
         def withHandle(handle: Handle): A = f(handle)
       })
     }
+
+    /** Extends this DBI to support for-comprehensions for transactions. */
+    def transaction: JDBITransactionWrapper =
+      new JDBITransactionWrapper(this)
+  }
+
+  /** Provides for-comprehension support for composable transactions */
+  class JDBITransactionWrapper private[jdbi] (dbi: JDBIWrapper) {
+    def map[A](f: Handle => A): A = dbi.inTransaction(f)
+    def flatMap[A](f: Handle => A): A = map(f)
+    def foreach(f: Handle => Unit): Unit = map(f)
   }
 
   implicit final def HandleWrapper(handle: Handle) = new HandleWrapper(handle)
@@ -121,6 +132,10 @@ package object jdbi {
     def attach[A : ClassTag]: A = {
       handle.attach(classTag[A].runtimeClass.asInstanceOf[Class[A]])
     }
+
+    /** Extends this [[org.skife.jdbi.v2.Handle]] to support the creation of typed DAOs through for-comprehensions. */
+    def attachable[A : ClassTag]: HandleDaoWrapper[A] =
+      new HandleDaoWrapper[A](handle, classTag[A].runtimeClass.asInstanceOf[Class[A]])
 
     /** Executes the given function within a transaction.
       *
@@ -181,6 +196,14 @@ package object jdbi {
         def inTransaction(conn: Handle, status: TransactionStatus): A = f(conn, status)
       })
     }
+
+  }
+
+  class HandleDaoWrapper[A] private [jdbi] (handle: Handle, clazz: Class[A]) {
+    //require(handle.isInTransaction, "handle must be in a transaction")
+    def map[B](f: A => B): B = f(handle.attach(clazz))
+    def flatMap[B](f: A => B): B = map(f)
+    def foreach(f: A => Unit): Unit = map(f)
   }
 
   implicit final def TransactionalWrapper[A <: Transactional[A]](transactional : A) =
