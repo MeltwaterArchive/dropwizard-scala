@@ -13,6 +13,23 @@ package object jdbi {
 
   /** Provides idiomatic Scala enhancements to the JDBI API.
     *
+    * Examples -
+    *
+    *   dbi.open[DAO] to open a handle and attach a new sql object of the specified type to that handle
+    *
+    *   dbi.daoFor[DAO] to create a new sql object which will obtain and release connections from this dbi instance, as it needs to,
+    *     and can, respectively
+    *
+    *   When in scope, you can create transactions using for comprehension. For instance -
+    *     {{{
+    *      for {
+    *       transaction <- dbi
+    *       dao <- transaction.dao[MyDao]
+    *     } yield {
+    *       dao.myFunction(v1, v2)
+    *     }
+    *     }}}
+    *
     * @param db the [[org.skife.jdbi.v2.DBI]] instance to wrap.
     */
   class JDBIWrapper private[jdbi](db: DBI) {
@@ -90,6 +107,12 @@ package object jdbi {
         def inTransaction(handle: Handle, status: TransactionStatus): A = f(handle)
       })
     }
+
+    def map[A](f: Handle => A): A = inTransaction(f)
+
+    def flatMap[A](f: Handle => A): A = map(f)
+
+    def foreach(f: Handle => Unit): Unit = map(f)
 
     /** Applies the given function with a DBI [[org.skife.jdbi.v2.Handle]].
       *
@@ -181,6 +204,18 @@ package object jdbi {
         def inTransaction(conn: Handle, status: TransactionStatus): A = f(conn, status)
       })
     }
+
+    def dao[A: ClassTag] =
+      new HandleDaoWrapper(handle, classTag[A].runtimeClass.asInstanceOf[Class[A]])
+  }
+
+  class HandleDaoWrapper[A] private [jdbi](handle: Handle, clazz: Class[A]) {
+
+    def map[B](f: A => B): B = f(handle.attach(clazz))
+
+    def flatMap[B](f: A => B): B = map(f)
+
+    def foreach(f: A => Unit): Unit = map(f)
   }
 
   implicit final def TransactionalWrapper[A <: Transactional[A]](transactional : A) =
