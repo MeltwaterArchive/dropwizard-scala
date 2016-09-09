@@ -17,17 +17,20 @@ package object jdbi {
     *
     *   dbi.open[DAO] to open a handle and attach a new sql object of the specified type to that handle
     *
-    *   dbi.daoFor[DAO] to create a new sql object which will obtain and release connections from this dbi instance, as it needs to,
-    *     and can, respectively
+    *   dbi.daoFor[DAO] to create a new sql object which will obtain and release connections from this dbi instance,
+    *   as it needs to, and can, respectively
     *
     *   When in scope, you can create transactions using for comprehension. For instance -
     *     {{{
-    *      for {
-    *       transaction <- dbi
-    *       dao <- transaction.dao[MyDao]
-    *     } yield {
-    *       dao.myFunction(v1, v2)
-    *     }
+    *       for { handle <- dbi.transaction
+    *            dao1   <- handle.attachable[Dao1]
+    *             ...
+    *            daoN   <- handle.attachable[DaoN] } yield {
+    *
+    *            dao1.some_function()
+    *            ...
+    *            daoN.some_other_function()
+    *      }
     *     }}}
     *
     * @param db the [[org.skife.jdbi.v2.DBI]] instance to wrap.
