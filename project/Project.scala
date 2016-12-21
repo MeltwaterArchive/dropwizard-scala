@@ -8,7 +8,7 @@ object Versions {
 
   val dropwizard = "1.0.5"
   val jackson = "2.8.4" // DW 1.0.0 uses jackson 2.7.6, but jackson-module-scala 2.7.5 is latest
-  val mockito = "1.10.19"
+  val mockito = "2.4.0"
   val scalaTest = "3.0.1"
 }
 
