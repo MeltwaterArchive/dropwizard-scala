@@ -1,27 +1,25 @@
 package com.datasift.dropwizard.scala
 
 import java.io.File
+import java.util.UUID
 import javax.ws.rs.client.Entity
 
 import com.codahale.metrics.MetricRegistry
 import com.datasift.dropwizard.jdbi.tweak.BindProduct
-import com.datasift.dropwizard.scala.test.{LiquibaseTest, MySQLTest, ApplicationTest, BeforeAndAfterAllMulti}
+import com.datasift.dropwizard.scala.test.{ApplicationTest, BeforeAndAfterAllMulti, LiquibaseTest, MySQLTest}
 import io.dropwizard.db.DataSourceFactory
 import org.scalatest.FlatSpec
-
 import com.datasift.dropwizard.scala.validation.constraints._
 import io.dropwizard.setup.Environment
 import io.dropwizard.Configuration
-
 import com.google.common.io.Resources
-
 import javax.ws.rs._
 import javax.ws.rs.core.{Form, MediaType}
 
 import org.skife.jdbi.v2.sqlobject.customizers.SingleValueResult
-import org.skife.jdbi.v2.sqlobject.{SqlQuery, SqlUpdate, Bind}
+import org.skife.jdbi.v2.sqlobject.{Bind, SqlQuery, SqlUpdate}
 
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 case class ScalaTestConfiguration(
   @NotEmpty greeting: Option[String] = None,
@@ -42,6 +40,10 @@ case class ScalaTestConfiguration(
   @GET @Path("/option")
   def greetWithOption(@QueryParam("name") name: Option[String]): List[String] =
     name.map(greeting.format(_)).toList
+
+  @GET @Path("/option_echo_complex")
+  def echoComplexOption(@QueryParam("uuid") uuid: Option[UUID]): List[Long] =
+    uuid.map(n => List(n.getMostSignificantBits, n.getLeastSignificantBits)).getOrElse(Nil)
 
   @GET @Path("/list")
   def greetWithList(@QueryParam("names") names: List[String]): List[String] =
@@ -252,6 +254,28 @@ class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
       _.queryParam("name", null)
         .request(MediaType.APPLICATION_JSON)
         .get(classOf[Iterable[String]])
+    }
+    assert(result === expected)
+  }
+
+  "GET /option_echo_complex" should "echo UUID long list" in {
+    val expected = Success(List(101L, 102L))
+    val uuid = new UUID(101L, 102L)
+
+    val result = request("/option_echo_complex").map {
+      _.queryParam("uuid", uuid.toString)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[List[Long]])
+    }
+    assert(result === expected)
+  }
+
+  it should "echo empty list when no UUID supplied" in {
+    val expected = Success(Nil)
+    val result = request("/option_echo_complex").map {
+      _.queryParam("uuid", null)
+        .request(MediaType.APPLICATION_JSON)
+        .get(classOf[List[Long]])
     }
     assert(result === expected)
   }

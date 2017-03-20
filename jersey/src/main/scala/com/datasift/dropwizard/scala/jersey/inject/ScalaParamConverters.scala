@@ -40,7 +40,7 @@ class OptionParamConverter[A](conv: ParamConverter[A])
   extends ParamConverter[Option[A]] {
 
   override def fromString(value: String): Option[A] = {
-    Option(conv.fromString(value))
+    Option(value).map(conv.fromString)
   }
 
   override def toString(value: Option[A]): String = {
