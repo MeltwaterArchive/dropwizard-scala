@@ -6,10 +6,10 @@ import sbtrelease._
 
 object Versions {
 
-  val dropwizard = "1.0.0"
-  val jackson = "2.7.5" // DW 1.0.0 uses jackson 2.7.6, but jackson-module-scala 2.7.5 is latest
-  val mockito = "1.10.19"
-  val scalaTest = "2.2.6"
+  val dropwizard = "1.0.5"
+  val jackson = "2.8.4"
+  val mockito = "2.4.0"
+  val scalaTest = "3.0.1"
 }
 
 object CompileOptions {
@@ -44,7 +44,8 @@ object DropwizardScala extends Build {
       connection = "git://github.com/dropwizard/dropwizard-scala.git",
       devConnection = Option("git@github.com@:dropwizard/dropwizard-scala.git")
     )),
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    scalaVersion := "2.12.1",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
     scalacOptions <++= scalaVersion.map(CompileOptions.scala),
     javacOptions ++= CompileOptions.java,
     resolvers in ThisBuild ++= Seq(
@@ -52,7 +53,7 @@ object DropwizardScala extends Build {
       "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
     ),
     libraryDependencies ++= Seq(
-      "org.log4s" %% "log4s" % "1.3.0",
+      "org.log4s" %% "log4s" % "1.3.4",
       "org.scalatest" %% "scalatest" % Versions.scalaTest % "test",
       "org.mockito" % "mockito-core" % Versions.mockito % "test"
     ),
