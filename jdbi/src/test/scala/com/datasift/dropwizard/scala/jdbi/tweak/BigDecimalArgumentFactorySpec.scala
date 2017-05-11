@@ -3,10 +3,10 @@ package com.datasift.dropwizard.scala.jdbi.tweak
 import java.sql.{Types, PreparedStatement}
 
 import org.scalatest.FlatSpec
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.skife.jdbi.v2.StatementContext
 import org.mockito.Mockito._
-import org.mockito.Matchers.{eq => equalTo}
+import org.mockito.ArgumentMatchers.{eq => equalTo}
 
 class BigDecimalArgumentFactorySpec extends FlatSpec with MockitoSugar {
 

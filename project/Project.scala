@@ -20,13 +20,7 @@ object CompileOptions {
       "-language:implicitConversions" ::
       "-language:higherKinds" ::
       "-feature" ::
-      (scalaVersion match {
-        case v if v.startsWith("2.11.") && v.stripPrefix("2.11.").toInt > 4 =>
-          "-target:jvm-1.8"
-        case _ =>
-          "-target:jvm-1.7"
-      }) ::
-      Nil
+      (if (scalaVersion.startsWith("2.10.")) "-target:jvm-1.7" :: Nil else Nil)
 
   val java: Seq[String] = Seq("-source", "1.8", "-target", "1.8")
 }

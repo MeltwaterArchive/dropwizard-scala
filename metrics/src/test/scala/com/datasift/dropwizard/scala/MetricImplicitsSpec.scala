@@ -87,7 +87,7 @@ class MetricImplicitsSpec extends FlatSpec {
   "Gauge" should "be transformable by another function" in {
     val registry = new MetricRegistry
     val gauge = registry.gauge("test.gauge")(50)
-    val transformed = gauge.map(2*)
+    val transformed = gauge.map(2 * _)
     assert(gauge.getValue === 50)
     assert(transformed.getValue === 100)
   }
