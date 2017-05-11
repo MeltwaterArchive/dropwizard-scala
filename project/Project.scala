@@ -40,7 +40,7 @@ object DropwizardScala extends Build {
     )),
     scalaVersion := "2.12.1",
     crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2"),
-    scalacOptions <++= scalaVersion.map(CompileOptions.scala),
+    scalacOptions ++= scalaVersion.map(CompileOptions.scala).value,
     javacOptions ++= CompileOptions.java,
     resolvers in ThisBuild ++= Seq(
       "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
@@ -52,7 +52,7 @@ object DropwizardScala extends Build {
       "org.mockito" % "mockito-core" % Versions.mockito % "test"
     ),
     publishMavenStyle := true,
-    publishTo <<= isSnapshot(repository),
+    publishTo := isSnapshot(repository).value,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => false },
     pomExtra := {
@@ -64,9 +64,9 @@ object DropwizardScala extends Build {
         </developer>
       </developers>
     },
-    unmanagedSourceDirectories in Compile <++= (sourceDirectory in Compile, scalaBinaryVersion) {
+    unmanagedSourceDirectories in Compile ++= { ((sourceDirectory in Compile).value, scalaBinaryVersion.value) match {
       case (s, v) => s / ("scala_" + v) :: Nil
-    },
+    }},
     PgpKeys.useGpg := true,
     PgpKeys.useGpgAgent := true,
     releaseCrossBuild := true,
