@@ -6,10 +6,10 @@ import sbtrelease._
 
 object Versions {
 
-  val dropwizard = "1.0.5"
-  val jackson = "2.8.4"
-  val mockito = "2.4.0"
-  val scalaTest = "3.0.1"
+  val dropwizard = "1.1.0"
+  val jackson = "2.8.7"
+  val mockito = "2.7.12"
+  val scalaTest = "3.0.3"
 }
 
 object CompileOptions {
