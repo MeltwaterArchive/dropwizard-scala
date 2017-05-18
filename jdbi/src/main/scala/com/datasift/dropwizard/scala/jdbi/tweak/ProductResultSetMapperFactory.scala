@@ -39,7 +39,7 @@ class ProductResultSetMapper[A <: Product](tpe: Class[A])
         // todo: do we need to explicitly match on the java variations of these types too?
         case _ if t.isAssignableFrom(classOf[Option[_]]) =>
           Option(rs.getObject(i))
-        case _ if !t.isPrimitive && rs.wasNull =>
+        case _ if !t.isPrimitive && (rs.getObject(i) == null) =>
           null
         case _ if t.isAssignableFrom(classOf[Boolean]) =>
           new java.lang.Boolean(rs.getBoolean(i))
