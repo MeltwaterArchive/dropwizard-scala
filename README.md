@@ -1,6 +1,8 @@
 Dropwizard Scala
 ================
 
+See the [Convey README](./README_Convey.md) for Convey-specific build and deployment instructions.
+
 *Scala support for [Dropwizard](http://dropwizard.io).*
 
 Usage

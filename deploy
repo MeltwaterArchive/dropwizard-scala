@@ -1,0 +1,58 @@
+#!/bin/bash
+
+set -e
+
+SCALA_VERSION=2.11
+
+VERSION=$1
+
+if [ -z "$VERSION" ] ; then # No version specified; get the version from the tag
+    echo "Getting release version from tag"
+    VERSION=$(git tag -l --points-at HEAD | grep ^v | sort -r | head -n 1 | tr -d v)
+    echo "Release version:  $VERSION"
+    ROS=release
+elif [[ $VERSION = *-* ]] ; then # Snapshot versions should contain a "-" character
+    echo "Snapshot version:  $VERSION"
+    ROS=snapshot
+else
+    echo "This looks like a release version.  Release versions should be determined by tag."
+    exit 1
+fi
+
+if [ -z "$VERSION" ] ; then
+    echo "No snapshot version specified and failed to get version from tag"
+    exit 1
+fi
+
+if [ "$ROS" = "release" ] ; then
+    UPDATE_RELEASE_INFO=true
+else
+    UPDATE_RELEASE_INFO=false
+fi
+
+REPO_ID=maven-s3-${ROS}-repo
+REPO_URL=s3://artifacts.getconvey.com/maven/${ROS}s
+
+
+for lib in core jdbi metrics test jersey validation ; do
+
+    DIR=${lib}/target/scala-${SCALA_VERSION}
+    ARTIFACT=dropwizard-scala-${lib}_${SCALA_VERSION}
+    POM=${DIR}/${ARTIFACT}-${VERSION}.pom
+    JAR=${DIR}/${ARTIFACT}-${VERSION}.jar
+
+    echo "Deploying ${ARTIFACT} ${ROS}...."
+    
+    mvn deploy:deploy-file \
+	-Durl=${REPO_URL} \
+	-DrepositoryId=${REPO_ID} \
+	-Dfile=${JAR} \
+	-DpomFile=${POM} \
+	-DgroupId=com.datasift.dropwizard.scala \
+	-DartifactId=${ARTIFACT} \
+	-Dversion=${VERSION} \
+	-DupdateReleaseInfo=${UPDATE_RELEASE_INFO}
+
+done
+
+echo "Done."

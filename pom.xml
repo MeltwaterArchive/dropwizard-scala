@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.getconvey</groupId>
+        <artifactId>parent-pom</artifactId>
+        <version>4.0.3</version>
+    </parent>
+
+    <groupId>com.datasift.dropwizard.scala</groupId>
+    <artifactId>dropwizard-scala-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <name>Dropwizard Scala</name>
+    <description>POM file for enabling publish to S3.</description>
+
+    <scm>
+        <connection>scm:git:git@github.com:getconvey/dropwizard-scala.git</connection>
+        <url>scm:git:git@github.com:getconvey/dropwizard-scala.git</url>
+        <developerConnection>scm:git:git@github.com:getconvey/dropwizard-scala.git</developerConnection>
+        <tag>v1.0.0</tag>
+    </scm>
+
+    <properties>
+
+        <!-- This is a library, so deploy to the Maven repository and generate the Javadoc files. -->
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+        <maven.source.skip>false</maven.source.skip>
+
+    </properties>
+
+    <dependencies>
+    </dependencies>
+
+    <build>
+    </build>
+
+</project>
