@@ -87,6 +87,8 @@ package object jdbi {
       * @return the result of the function.
       * @throws Exception if an Exception is thrown by the function, the transaction will be
       *                   rolled-back.
+      * @deprecated This method cannot be called. See https://issues.scala-lang.org/browse/SI-8021
+      *             Use JDBIWrapper#inTransactionWithIsolation.
       */
     def inTransaction[A](isolation: TransactionIsolationLevel)
                         (f: (Handle, TransactionStatus) => A): A = {
@@ -103,11 +105,29 @@ package object jdbi {
       * @return the result of the function.
       * @throws Exception if an Exception is thrown by the function, the transaction will be
       *                   rolled-back.
+      * @deprecated This method cannot be called. See https://issues.scala-lang.org/browse/SI-8021
+      *             Use JDBIWrapper#inTransactionWithIsolation.
       */
     def inTransaction[A](isolation: TransactionIsolationLevel)
                         (f: Handle => A): A = {
       db.inTransaction(isolation, new TransactionCallback[A] {
         def inTransaction(handle: Handle, status: TransactionStatus): A = f(handle)
+      })
+    }
+
+    /** Executes the given function within a transaction of the given isolation level.
+      * This method has been added to break the ambiguity of the methods above.
+      *
+      * @tparam A the return type of the function to execute.
+      * @param isolation the isolation level for the transaction.
+      * @param f the function to execute within the transaction.
+      * @return the result of the function.
+      * @throws Exception if an Exception is thrown by the function, the transaction will be
+      *                   rolled-back.
+      */
+    def inTransactionWithIsolation[A](isolation: TransactionIsolationLevel)(f: (Handle, TransactionStatus) => A): A = {
+      db.inTransaction(isolation, new TransactionCallback[A] {
+        def inTransaction(handle: Handle, status: TransactionStatus): A = f(handle, status)
       })
     }
 
