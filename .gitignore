@@ -8,4 +8,4 @@ dependency-reduced-pom.xml
 .settings/
 .classpath
 .project
-
+.bsp/
