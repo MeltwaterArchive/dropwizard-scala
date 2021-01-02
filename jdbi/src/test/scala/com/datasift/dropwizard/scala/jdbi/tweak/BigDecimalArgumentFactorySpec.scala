@@ -2,13 +2,14 @@ package com.datasift.dropwizard.scala.jdbi.tweak
 
 import java.sql.{Types, PreparedStatement}
 
-import org.scalatest.FlatSpec
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.flatspec.AnyFlatSpec
+import org.mockito.scalatest.MockitoSugar
 import org.skife.jdbi.v2.StatementContext
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers.{eq => equalTo}
+import org.scalatest.matchers.should.Matchers
 
-class BigDecimalArgumentFactorySpec extends FlatSpec with MockitoSugar {
+class BigDecimalArgumentFactorySpec extends AnyFlatSpec with MockitoSugar with Matchers {
 
   val factory = new BigDecimalArgumentFactory
   val ctx = mock[StatementContext]
