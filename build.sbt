@@ -23,8 +23,8 @@ lazy val commonSettings = Seq(
     connection = "git://github.com/dropwizard/dropwizard-scala.git",
     devConnection = Option("git@github.com@:dropwizard/dropwizard-scala.git")
   )),
-  scalaVersion := "2.13.4",
-  crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.4"),
+  scalaVersion := "2.13.5",
+  crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.5"),
   scalacOptions ++=
     "-deprecation" ::
       "-unchecked" ::
