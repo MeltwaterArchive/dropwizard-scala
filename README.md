@@ -3,6 +3,8 @@ Dropwizard Scala
 
 *Scala support for [Dropwizard](http://dropwizard.io).*
 
+**This project is no longer actively maintained. If you wish to continue using it, you're welcome to fork it and continue using in-line with the Apache 2.0 Licensing terms.**
+
 Usage
 -----
 
