@@ -1,13 +1,14 @@
 package com.datasift.dropwizard.scala.jdbi.tweak
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.collection.immutable.{SortedSet, HashSet}
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Tests [[com.datasift.dropwizard.scala.jdbi.tweak.IterableContainerFactory]]
  */
-class IterableContainerFactorySpec extends FlatSpec {
+class IterableContainerFactorySpec extends AnyFlatSpec with Matchers {
 
   "IterableContainerFactory for Seqs" should "accept Seqs" in {
     assert(new IterableContainerFactory[Seq].accepts(classOf[Seq[Int]]))

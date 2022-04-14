@@ -3,11 +3,11 @@ package com.datasift.dropwizard.scala
 import com.codahale.metrics._
 import com.datasift.dropwizard.scala.metrics._
 import io.dropwizard.util.Duration
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 
-class MetricImplicitsSpec extends FlatSpec {
+class MetricImplicitsSpec extends AnyFlatSpec {
 
   class TestClock(var tick: Long = 0) extends Clock {
     override def getTick = tick

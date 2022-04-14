@@ -23,8 +23,8 @@ lazy val commonSettings = Seq(
     connection = "git://github.com/dropwizard/dropwizard-scala.git",
     devConnection = Option("git@github.com@:dropwizard/dropwizard-scala.git")
   )),
-  scalaVersion := "2.12.1",
-  crossScalaVersions := Seq("2.11.11", "2.12.2"),
+  scalaVersion := "2.13.5",
+  crossScalaVersions := Seq("2.11.12", "2.12.12", "2.13.5"),
   scalacOptions ++=
     "-deprecation" ::
       "-unchecked" ::
@@ -39,9 +39,9 @@ lazy val commonSettings = Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   ),
   libraryDependencies ++= Seq(
-    "org.log4s" %% "log4s" % "1.3.4",
+    "org.log4s" %% "log4s" % "1.9.0",
     "org.scalatest" %% "scalatest" % Versions.scalaTest % "test",
-    "org.mockito" % "mockito-core" % Versions.mockito % "test"
+    "org.mockito"   %% "mockito-scala" % Versions.mockitoScala % "test"
   ),
   publishMavenStyle := true,
   publishTo := isSnapshot(repository).value,

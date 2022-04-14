@@ -1,15 +1,16 @@
 package com.datasift.dropwizard.scala.jdbi.tweak
 
-import org.scalatest.FlatSpec
-import org.scalatest.mockito.MockitoSugar
+import org.scalatest.flatspec.AnyFlatSpec
+import org.mockito.scalatest.MockitoSugar
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers.{eq => equalTo}
 import com.datasift.dropwizard.scala.jdbi.`package`.JDBIWrapper
 import org.skife.jdbi.v2.TransactionIsolationLevel
 import org.skife.jdbi.v2.TransactionStatus
 import org.skife.jdbi.v2.Handle
+import org.scalatest.matchers.should.Matchers
 
-class JDBIWrapperSpec extends FlatSpec with MockitoSugar {
+class JDBIWrapperSpec extends AnyFlatSpec with MockitoSugar with Matchers {
 
   val factory = new BigDecimalArgumentFactory
 

@@ -1,6 +1,6 @@
 package com.datasift.dropwizard.scala.validation
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
 import io.dropwizard.setup.{Environment, Bootstrap}
 import io.dropwizard.{Configuration, Application}
@@ -10,7 +10,7 @@ import scala.collection.JavaConverters.asScalaSetConverter
 
 import javax.validation.Validator
 
-class ScalaValidatorsSpec extends FlatSpec {
+class ScalaValidatorsSpec extends AnyFlatSpec {
 
   case class Fixture (
     @NotEmpty mandatoryOption: Option[Int] = Option(5),

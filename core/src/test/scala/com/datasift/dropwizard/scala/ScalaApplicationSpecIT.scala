@@ -8,7 +8,7 @@ import com.codahale.metrics.MetricRegistry
 import com.datasift.dropwizard.jdbi.tweak.BindProduct
 import com.datasift.dropwizard.scala.test.{ApplicationTest, BeforeAndAfterAllMulti, LiquibaseTest, MySQLTest}
 import io.dropwizard.db.DataSourceFactory
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import com.datasift.dropwizard.scala.validation.constraints._
 import io.dropwizard.setup.Environment
 import io.dropwizard.Configuration
@@ -142,7 +142,7 @@ trait TestDAO {
 
 case class Row(d: BigDecimal, o: Option[String])
 
-class ScalaApplicationSpecIT extends FlatSpec with BeforeAndAfterAllMulti {
+class ScalaApplicationSpecIT extends AnyFlatSpec with BeforeAndAfterAllMulti {
 
   val fixture = "Homer" :: "Bart" :: "Lisa" :: Nil
   val dsFactory = new DataSourceFactory()

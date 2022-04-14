@@ -1,11 +1,12 @@
 package com.datasift.dropwizard.scala.jdbi.tweak
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Tests [[com.datasift.dropwizard.scala.jdbi.tweak.OptionContainerFactory]]
  */
-class OptionContainerFactorySpec extends FlatSpec {
+class OptionContainerFactorySpec extends AnyFlatSpec with Matchers {
 
   val factory = new OptionContainerFactory
 
